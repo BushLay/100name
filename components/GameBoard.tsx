@@ -1,0 +1,185 @@
+"use client"
+
+import { useEffect, useState, useSyncExternalStore } from "react"
+
+import { GameInput } from "@/components/GameInput"
+import { GuessList } from "@/components/GuessList"
+import { ScoreBoard } from "@/components/ScoreBoard"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
+import { checkWinCondition, validateGuess } from "@/lib/game"
+
+type StoredGuess = {
+  qid: string
+  name: string
+}
+
+type GameState = {
+  score: number
+  guessedQIDs: string[]
+  guessedNames: StoredGuess[]
+}
+
+type Feedback = {
+  tone: "success" | "error"
+  text: string
+} | null
+
+const STORAGE_KEY = "name100-game-state"
+
+function getInitialState(): GameState {
+  if (typeof window === "undefined") {
+    return {
+      score: 0,
+      guessedQIDs: [],
+      guessedNames: [],
+    }
+  }
+
+  const raw = window.localStorage.getItem(STORAGE_KEY)
+
+  if (!raw) {
+    return {
+      score: 0,
+      guessedQIDs: [],
+      guessedNames: [],
+    }
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<GameState>
+
+    return {
+      score: parsed.score ?? 0,
+      guessedQIDs: parsed.guessedQIDs ?? [],
+      guessedNames: parsed.guessedNames ?? [],
+    }
+  } catch {
+    window.localStorage.removeItem(STORAGE_KEY)
+
+    return {
+      score: 0,
+      guessedQIDs: [],
+      guessedNames: [],
+    }
+  }
+}
+
+export function GameBoard() {
+  const isReady = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  )
+
+  if (!isReady) {
+    return <div className="mx-auto w-full max-w-5xl" />
+  }
+
+  return <GameBoardClient />
+}
+
+function GameBoardClient() {
+  const [gameState, setGameState] = useState<GameState>(getInitialState)
+  const [loading, setLoading] = useState(false)
+  const [feedback, setFeedback] = useState<Feedback>(null)
+
+  useEffect(() => {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState))
+  }, [gameState])
+
+  async function handleSubmit(name: string) {
+    setLoading(true)
+
+    try {
+      const result = await validateGuess(name, gameState.guessedQIDs, gameState.score)
+
+      setFeedback({
+        tone: result.valid ? "success" : "error",
+        text: result.message,
+      })
+
+      if (!result.valid) {
+        return
+      }
+
+      setGameState((current) => ({
+        score: result.score,
+        guessedQIDs: [...current.guessedQIDs, result.qid],
+        guessedNames: [...current.guessedNames, { qid: result.qid, name: result.name }],
+      }))
+    } catch {
+      setFeedback({
+        tone: "error",
+        text: "Wikidata is unavailable right now. Please try again.",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const won = checkWinCondition(gameState.score)
+  return (
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
+      <GameInput disabled={won} loading={loading} onSubmit={handleSubmit} />
+
+      <section className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
+        <Card className="overflow-hidden border-white/60 bg-white/88 backdrop-blur dark:border-white/10 dark:bg-black/25">
+          <CardContent className="p-6 sm:p-8">
+            <div className="flex flex-col gap-4">
+              <Badge className="w-fit" variant="secondary">
+                Wikidata MVP
+              </Badge>
+              <div className="space-y-3">
+                <h1 className="max-w-2xl text-4xl font-semibold tracking-tight sm:text-5xl">
+                  Name 100 real women.
+                </h1>
+                <p className="max-w-2xl text-base leading-7 text-muted-foreground">
+                  Submit a full name, let Wikidata verify the person, and race to 100
+                  points without repeating a QID.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+                <Badge variant="outline">Human only</Badge>
+                <Badge variant="outline">Female only</Badge>
+                <Badge variant="outline">Wikipedia required</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <ScoreBoard score={gameState.score} won={won} />
+      </section>
+
+      <GuessList guesses={gameState.guessedNames} />
+
+      {feedback ? (
+        <Card
+          className={
+            feedback.tone === "success"
+              ? "border-emerald-200 bg-emerald-50/90 dark:border-emerald-900 dark:bg-emerald-950/30"
+              : "border-red-200 bg-red-50/90 dark:border-red-900 dark:bg-red-950/30"
+          }
+        >
+          <CardContent className="flex items-center justify-between gap-4 p-4">
+            <p className="text-sm font-medium">{feedback.text}</p>
+            <Badge variant={feedback.tone === "success" ? "success" : "destructive"}>
+              {feedback.tone === "success" ? "Accepted" : "Rejected"}
+            </Badge>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {won ? (
+        <Card className="border-amber-200 bg-amber-50/90 dark:border-amber-900 dark:bg-amber-950/30">
+          <CardContent className="flex flex-col gap-2 p-5">
+            <p className="text-lg font-semibold">You reached 100 points.</p>
+            <p className="text-sm text-muted-foreground">
+              Refresh safely anytime. Your progress is stored locally in this browser.
+            </p>
+          </CardContent>
+        </Card>
+      ) : null}
+    </div>
+  )
+}
