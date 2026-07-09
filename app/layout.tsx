@@ -47,6 +47,11 @@ export const metadata: Metadata = {
     template: "%s | Name 100",
   },
   description: "A Wikidata-powered daily women name challenge with share and SEO support.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
   openGraph: {
     title: "Name 100",
     description:

@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useEffect, useState, useSyncExternalStore } from "react"
 
 import type { OpenGameState, SubmitOpenGuessResponse } from "@/lib/backend-contracts"
@@ -144,6 +145,16 @@ function GameBoardClient() {
                 Wikidata Open Mode
               </Badge>
               <div className="space-y-3">
+                <div className="flex items-center">
+                  <Image
+                    alt="100name logo"
+                    className="h-auto w-40"
+                    height={160}
+                    priority
+                    src="/logo.png"
+                    width={160}
+                  />
+                </div>
                 <h1 className="max-w-2xl text-4xl font-semibold tracking-tight sm:text-5xl">
                   Name 100 real women.
                 </h1>
