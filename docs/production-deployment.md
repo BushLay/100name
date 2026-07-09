@@ -284,6 +284,7 @@ Use `npm.cmd run ops:cleanup` when you want the same protected cleanup path from
 Use `npm.cmd run ops:nightly-maintenance` to bundle recorded readiness checks, retention cleanup, and a daily archived ops report into one scheduler-friendly job. It defaults cleanup to `dryRun: true`; pass `-- --apply` only after the retention windows are proven correct.
 Use `/admin/history` when you need a longer incident timeline or report archive review window than the main `/admin` dashboard provides.
 That focused history console also supports local saved views, shareable filter URLs, and one-click filter reset so responders can hand off the same investigation scope cleanly.
+If you deploy on Vercel Hobby, remember its built-in Cron frequency is more limited than paid plans; keep `vercel.json` on a daily cadence or move higher-frequency checks to an external scheduler.
 
 Current production deployments should use the shared Postgres-backed limiter. Local development can continue using the in-memory limiter.
 Identity recovery now relies on server-stored hashed recovery codes. Operators should treat recovery-code support as a user-facing availability feature and include it in release smoke tests.

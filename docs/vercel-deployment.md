@@ -64,8 +64,14 @@ NAME100_RESTORE_DATABASE_URL=postgres://...另一个恢复演练库
 
 当前默认 Cron：
 
-- 每小时一次：`/api/internal/cron/readiness`
+- 每天一次：`/api/internal/cron/readiness`
 - 每天一次：`/api/internal/cron/daily-report`
+
+说明：
+
+- 当前仓库的 `vercel.json` 已经调整为兼容 Vercel Hobby 免费版。
+- Vercel Hobby 账号不支持高于“每日一次”的 Cron 频率，所以这里没有再使用每小时探测。
+- 如果你以后升级到 Pro，或者改用外部调度器，可以再把 readiness probe 提高到每小时一次。
 
 ## 4. 推荐部署步骤
 
