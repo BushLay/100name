@@ -138,12 +138,17 @@ function GameBoardClient() {
       <GameInput disabled={won || initializing} loading={loading || initializing} onSubmit={handleSubmit} />
 
       <section className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
-        <Card className="overflow-hidden border-white/60 bg-white/88 backdrop-blur dark:border-white/10 dark:bg-black/25">
+        <Card className="overflow-hidden border-sky-200/70 bg-[linear-gradient(135deg,rgba(240,249,255,0.98),rgba(224,242,254,0.95)_48%,rgba(239,246,255,0.98)_100%)] shadow-[0_24px_80px_rgba(14,165,233,0.12)] backdrop-blur dark:border-sky-300/15 dark:bg-[linear-gradient(135deg,rgba(8,25,46,0.92),rgba(8,47,73,0.9)_48%,rgba(15,23,42,0.95)_100%)]">
           <CardContent className="p-6 sm:p-8">
             <div className="flex flex-col gap-4">
-              <Badge className="w-fit" variant="secondary">
-                Wikidata Open Mode
-              </Badge>
+              <div className="flex flex-wrap gap-2">
+                <Badge className="w-fit" variant="secondary">
+                  Open Mode
+                </Badge>
+                <Badge className="w-fit" variant="outline">
+                  Endless Arcade
+                </Badge>
+              </div>
               <div className="space-y-3">
                 <div className="flex items-center">
                   <Image
@@ -156,17 +161,25 @@ function GameBoardClient() {
                   />
                 </div>
                 <h1 className="max-w-2xl text-4xl font-semibold tracking-tight sm:text-5xl">
-                  Name 100 real women.
+                  Build a 100-name streak.
                 </h1>
                 <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-                  Submit a full name, let Wikidata verify the person, and race to 100
-                  points without repeating a QID.
+                  Submit a full name, let Wikidata judge it live, and keep stacking verified women until you clear the board.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-                <Badge variant="outline">Human only</Badge>
-                <Badge variant="outline">Female only</Badge>
-                <Badge variant="outline">Wikipedia required</Badge>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-sky-200/70 bg-white/70 p-3 text-sm shadow-sm dark:border-sky-300/10 dark:bg-white/5">
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Rule 01</p>
+                  <p className="mt-2 font-medium">Human only</p>
+                </div>
+                <div className="rounded-2xl border border-sky-200/70 bg-white/70 p-3 text-sm shadow-sm dark:border-sky-300/10 dark:bg-white/5">
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Rule 02</p>
+                  <p className="mt-2 font-medium">Female only</p>
+                </div>
+                <div className="rounded-2xl border border-sky-200/70 bg-white/70 p-3 text-sm shadow-sm dark:border-sky-300/10 dark:bg-white/5">
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Rule 03</p>
+                  <p className="mt-2 font-medium">Wikipedia required</p>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -181,25 +194,25 @@ function GameBoardClient() {
         <Card
           className={
             feedback.tone === "success"
-              ? "border-emerald-200 bg-emerald-50/90 dark:border-emerald-900 dark:bg-emerald-950/30"
-              : "border-red-200 bg-red-50/90 dark:border-red-900 dark:bg-red-950/30"
+              ? "border-emerald-300 bg-[linear-gradient(135deg,rgba(236,253,245,0.98),rgba(209,250,229,0.92))] dark:border-emerald-800 dark:bg-emerald-950/30"
+              : "border-red-300 bg-[linear-gradient(135deg,rgba(254,242,242,0.98),rgba(254,226,226,0.92))] dark:border-red-900 dark:bg-red-950/30"
           }
         >
           <CardContent className="flex items-center justify-between gap-4 p-4">
             <p className="text-sm font-medium">{feedback.text}</p>
             <Badge variant={feedback.tone === "success" ? "success" : "destructive"}>
-              {feedback.tone === "success" ? "Accepted" : "Rejected"}
+              {feedback.tone === "success" ? "Hit" : "Miss"}
             </Badge>
           </CardContent>
         </Card>
       ) : null}
 
       {won ? (
-        <Card className="border-amber-200 bg-amber-50/90 dark:border-amber-900 dark:bg-amber-950/30">
+        <Card className="border-amber-300 bg-[linear-gradient(135deg,rgba(255,251,235,0.98),rgba(254,240,138,0.35))] dark:border-amber-900 dark:bg-amber-950/30">
           <CardContent className="flex flex-col gap-2 p-5">
-            <p className="text-lg font-semibold">You reached 100 points.</p>
+            <p className="text-lg font-semibold">Run cleared. You reached 100.</p>
             <p className="text-sm text-muted-foreground">
-              Your open-mode progress is now backed by the active server store.
+              Your open-mode victory is now saved in the active server store.
             </p>
           </CardContent>
         </Card>

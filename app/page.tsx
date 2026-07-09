@@ -16,25 +16,25 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <main className="min-h-svh bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.18),transparent_30%),radial-gradient(circle_at_right,rgba(14,165,233,0.18),transparent_28%),linear-gradient(180deg,#fff8f1_0%,#f7f1ff_48%,#eef6ff_100%)] px-4 py-8 text-foreground dark:bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.12),transparent_30%),radial-gradient(circle_at_right,rgba(56,189,248,0.16),transparent_28%),linear-gradient(180deg,#141226_0%,#111827_48%,#0b1220_100%)] sm:px-6 lg:px-8">
+    <main className="min-h-svh bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.2),transparent_24%),radial-gradient(circle_at_20%_20%,rgba(250,204,21,0.14),transparent_18%),linear-gradient(180deg,#f0f9ff_0%,#e0f2fe_24%,#ecfeff_52%,#f8fafc_100%)] px-4 py-8 text-foreground dark:bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.18),transparent_24%),radial-gradient(circle_at_20%_20%,rgba(250,204,21,0.08),transparent_18%),linear-gradient(180deg,#08152a_0%,#082f49_32%,#0f172a_100%)] sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
         <GameBoard />
 
-        <Card className="overflow-hidden border-white/60 bg-white/88 backdrop-blur dark:border-white/10 dark:bg-black/25">
+        <Card className="overflow-hidden border-sky-200/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.95),rgba(224,242,254,0.92)_40%,rgba(236,253,245,0.92)_100%)] backdrop-blur dark:border-sky-300/15 dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.88),rgba(12,74,110,0.88)_40%,rgba(4,47,46,0.86)_100%)]">
           <CardHeader className="gap-4">
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary">Daily Challenge</Badge>
-              <Badge variant="outline">SEO ready</Badge>
-              <Badge variant="outline">Shareable</Badge>
+              <Badge variant="outline">Score Chase</Badge>
+              <Badge variant="outline">Share Run</Badge>
             </div>
             <div className="space-y-3">
               <CardTitle className="max-w-3xl text-2xl leading-tight sm:text-3xl">
-                Come back tomorrow for a new daily theme.
+                Clear today, then come back for tomorrow&apos;s remix.
               </CardTitle>
               <CardDescription className="max-w-3xl text-base leading-7">
                 The base mode accepts any real woman who passes Wikidata. The daily mode
-                switches to one themed rule each day, such as female actors or fictional
-                characters, so players can compare results and share the route.
+                swaps in a themed ruleset each day, like actors or fictional characters,
+                so every run feels like a new board with its own bragging rights.
               </CardDescription>
             </div>
           </CardHeader>
@@ -42,29 +42,26 @@ export default function Page() {
             <div className="grid gap-4 sm:grid-cols-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                  Discover
+                  Mode Shift
                 </p>
                 <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                  Static metadata, daily routes, and searchable text make the challenge
-                  indexable.
+                  A fresh daily ruleset pushes players out of memorized comfort picks.
                 </p>
               </div>
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                  Retain
+                  Progress
                 </p>
                 <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                  Local history tracks played dates, themed completions, streaks, and best
-                  times.
+                  Local history tracks played dates, themed clears, streaks, and best times.
                 </p>
               </div>
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                  Share
+                  Bragging Rights
                 </p>
                 <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                  Finished themed runs generate ready-to-copy text for Twitter, Reddit, and
-                  Discord.
+                  Finished runs generate ready-to-post results for Twitter, Reddit, and Discord.
                 </p>
               </div>
             </div>

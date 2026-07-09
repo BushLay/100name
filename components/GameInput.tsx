@@ -19,9 +19,9 @@ export function GameInput({
   disabled = false,
   loading = false,
   onSubmit,
-  title = "Guess A Real Woman",
-  description = "Enter a full name. Each valid female human with a Wikipedia page earns one point.",
-  buttonLabel = "Submit",
+  title = "Drop Your Next Name",
+  description = "Chain together valid women from Wikidata, avoid repeats, and keep your run alive until you hit 100.",
+  buttonLabel = "Lock In",
 }: GameInputProps) {
   const [value, setValue] = useState("")
 
@@ -39,47 +39,51 @@ export function GameInput({
   }
 
   return (
-    <Card className="overflow-hidden border-white/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.98),rgba(255,245,250,0.96)_42%,rgba(239,246,255,0.96)_100%)] shadow-[0_36px_120px_rgba(244,114,182,0.18)] ring-1 ring-white/80 backdrop-blur dark:border-white/10 dark:bg-[linear-gradient(135deg,rgba(17,24,39,0.96),rgba(30,27,45,0.96)_42%,rgba(14,23,38,0.96)_100%)] dark:ring-white/10">
+    <Card className="overflow-hidden border-sky-200/80 bg-[linear-gradient(135deg,rgba(6,23,49,0.98),rgba(17,58,92,0.96)_45%,rgba(8,26,59,0.98)_100%)] text-white shadow-[0_36px_120px_rgba(14,165,233,0.28)] ring-1 ring-cyan-200/40 dark:border-sky-400/20 dark:ring-sky-300/10">
       <CardContent className="p-0">
         <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="relative overflow-hidden px-6 py-7 sm:px-8 sm:py-9">
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-rose-300/70 to-transparent dark:via-sky-300/30" />
-            <div className="absolute -left-16 top-10 h-36 w-36 rounded-full bg-rose-200/40 blur-3xl dark:bg-rose-500/10" />
-            <div className="absolute bottom-0 right-0 h-40 w-40 rounded-full bg-sky-200/45 blur-3xl dark:bg-sky-500/10" />
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-200/80 to-transparent" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.28),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(250,204,21,0.16),transparent_24%)]" />
+            <div className="absolute inset-y-0 right-0 w-px bg-white/10" />
             <div className="relative flex h-full flex-col justify-between gap-6">
               <div className="space-y-4">
-                <div className="inline-flex w-fit items-center rounded-full border border-white/80 bg-white/75 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-slate-600 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
-                  Hero Input
+                <div className="inline-flex w-fit items-center rounded-full border border-cyan-200/30 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100 shadow-sm">
+                  Live Run Console
                 </div>
                 <CardHeader className="space-y-3 p-0">
                   <CardTitle className="max-w-lg text-3xl leading-tight sm:text-4xl lg:text-[2.8rem]">
                     {title}
                   </CardTitle>
-                  <CardDescription className="max-w-xl text-base leading-7 text-slate-600 dark:text-slate-300">
+                  <CardDescription className="max-w-xl text-base leading-7 text-sky-50/78">
                     {description}
                   </CardDescription>
                 </CardHeader>
               </div>
-              <div className="flex flex-wrap gap-2.5 text-sm text-slate-600 dark:text-slate-300">
-                <div className="rounded-full border border-white/80 bg-white/70 px-3 py-1.5 shadow-sm dark:border-white/10 dark:bg-white/5">
-                  Full name
+              <div className="grid gap-2 text-sm text-cyan-50/88 sm:grid-cols-3">
+                <div className="rounded-2xl border border-white/12 bg-white/8 px-3 py-2 shadow-sm">
+                  Target: 100 names
                 </div>
-                <div className="rounded-full border border-white/80 bg-white/70 px-3 py-1.5 shadow-sm dark:border-white/10 dark:bg-white/5">
-                  Wikidata checked
+                <div className="rounded-2xl border border-white/12 bg-white/8 px-3 py-2 shadow-sm">
+                  Rule: no repeats
                 </div>
-                <div className="rounded-full border border-white/80 bg-white/70 px-3 py-1.5 shadow-sm dark:border-white/10 dark:bg-white/5">
-                  One tap submit
+                <div className="rounded-2xl border border-white/12 bg-white/8 px-3 py-2 shadow-sm">
+                  Judge: Wikidata
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="border-t border-white/70 bg-white/55 px-6 py-7 dark:border-white/10 dark:bg-black/20 sm:px-8 sm:py-9 lg:border-l lg:border-t-0">
+          <div className="border-t border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0.04))] px-6 py-7 sm:px-8 sm:py-9 lg:border-l lg:border-t-0">
             <form className="flex h-full flex-col justify-center gap-4" onSubmit={handleSubmit}>
+              <div className="flex items-center justify-between text-xs uppercase tracking-[0.24em] text-cyan-100/70">
+                <span>Input Channel</span>
+                <span>{loading ? "Scanning" : "Ready"}</span>
+              </div>
               <Input
                 autoComplete="off"
                 autoCorrect="off"
-                className="h-20 rounded-[1.6rem] border-white/80 bg-white px-6 text-2xl font-medium shadow-[0_18px_60px_rgba(15,23,42,0.12)] placeholder:text-xl dark:border-white/10 dark:bg-black/35"
+                className="h-20 rounded-[1.6rem] border-cyan-100/20 bg-slate-950/70 px-6 text-2xl font-medium text-white shadow-[0_18px_60px_rgba(2,12,27,0.42)] placeholder:text-xl placeholder:text-sky-100/38"
                 disabled={disabled || loading}
                 onChange={(event) => setValue(event.target.value)}
                 placeholder="Ada Lovelace"
@@ -88,7 +92,7 @@ export function GameInput({
               />
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Button
-                  className="h-16 flex-1 rounded-[1.4rem] px-7 text-lg font-semibold shadow-[0_16px_48px_rgba(244,114,182,0.24)]"
+                  className="h-16 flex-1 rounded-[1.4rem] border border-cyan-200/40 bg-[linear-gradient(135deg,#22d3ee,#0ea5e9_48%,#2563eb)] px-7 text-lg font-semibold text-slate-950 shadow-[0_16px_48px_rgba(14,165,233,0.34)]"
                   disabled={disabled || loading}
                   size="lg"
                   type="submit"
@@ -96,8 +100,8 @@ export function GameInput({
                   {loading ? "Checking..." : buttonLabel}
                 </Button>
               </div>
-              <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
-                Enter one name at a time. Correct answers appear immediately in the saved list below.
+              <p className="text-sm leading-6 text-sky-50/70">
+                One full name per turn. Valid hits are locked into your run instantly.
               </p>
             </form>
           </div>
