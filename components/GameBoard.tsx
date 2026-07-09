@@ -6,6 +6,7 @@ import { useEffect, useState, useSyncExternalStore } from "react"
 import type { OpenGameState, SubmitOpenGuessResponse } from "@/lib/backend-contracts"
 import { GameInput } from "@/components/GameInput"
 import { GuessList } from "@/components/GuessList"
+import { RecentGuessHistory, type RecentGuessHistoryItem } from "@/components/RecentGuessHistory"
 import { ScoreBoard } from "@/components/ScoreBoard"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -55,6 +56,7 @@ function GameBoardClient() {
   const [loading, setLoading] = useState(false)
   const [initializing, setInitializing] = useState(true)
   const [feedback, setFeedback] = useState<Feedback>(null)
+  const [recentGuesses, setRecentGuesses] = useState<RecentGuessHistoryItem[]>([])
 
   useEffect(() => {
     let cancelled = false
@@ -116,6 +118,15 @@ function GameBoardClient() {
         throw new Error(result.message ?? "Failed to submit open-mode guess.")
       }
 
+      setRecentGuesses((current) => [
+        {
+          id: crypto.randomUUID(),
+          name,
+          accepted: result.accepted,
+          message: result.message,
+        },
+        ...current,
+      ].slice(0, 8))
       setFeedback({
         tone: result.accepted ? "success" : "error",
         text: result.message,
@@ -189,6 +200,7 @@ function GameBoardClient() {
       </section>
 
       <GuessList guesses={gameState.acceptedGuesses} />
+      <RecentGuessHistory items={recentGuesses} />
 
       {feedback ? (
         <Card

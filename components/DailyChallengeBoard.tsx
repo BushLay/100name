@@ -11,6 +11,7 @@ import type {
 } from "@/lib/backend-contracts"
 import { GameInput } from "@/components/GameInput"
 import { GuessList } from "@/components/GuessList"
+import { RecentGuessHistory, type RecentGuessHistoryItem } from "@/components/RecentGuessHistory"
 import { ScoreBoard } from "@/components/ScoreBoard"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -150,6 +151,7 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
   const [copied, setCopied] = useState(false)
   const [shareBounce, setShareBounce] = useState(false)
   const [showResultDialog, setShowResultDialog] = useState(false)
+  const [recentGuesses, setRecentGuesses] = useState<RecentGuessHistoryItem[]>([])
   const lastCompletedState = useRef(false)
 
   const currentAttempt = dailyState.attempt
@@ -240,6 +242,15 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
         throw new Error(result.message ?? "Failed to submit guess.")
       }
 
+      setRecentGuesses((current) => [
+        {
+          id: "guess" in result && result.guess?.id ? result.guess.id : crypto.randomUUID(),
+          name,
+          accepted: result.accepted,
+          message: result.message,
+        },
+        ...current,
+      ].slice(0, 8))
       setFeedback({
         tone: result.accepted ? "success" : "error",
         text: result.message,
@@ -396,6 +407,7 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
         </section>
 
         <GuessList guesses={dailyState.acceptedGuesses} />
+        <RecentGuessHistory items={recentGuesses} />
 
         {feedback ? (
           <Card
