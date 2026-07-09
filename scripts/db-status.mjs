@@ -28,7 +28,7 @@ try {
   await client.connect()
 
   const versions = await loadMigrationVersions()
-  const migrationsTableResult = await client.query<{ exists: string | null }>(`
+  const migrationsTableResult = await client.query(`
     select to_regclass('public.schema_migrations')::text as exists
   `)
   const hasMigrationsTable = Boolean(migrationsTableResult.rows[0]?.exists)
@@ -36,7 +36,7 @@ try {
   const appliedVersions = hasMigrationsTable
     ? new Set(
         (
-          await client.query<{ version: string }>(
+          await client.query(
             "select version from schema_migrations order by version asc"
           )
         ).rows.map((row) => row.version)

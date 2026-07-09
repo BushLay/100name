@@ -12,6 +12,7 @@
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "next typegen && tsc --noEmit",
     "generate:secret": "node scripts/generate-secret.mjs",
+    "seed:demo": "node scripts/seed-demo-data.mjs",
     "db:init": "node scripts/init-db.mjs",
     "db:migrate": "node scripts/db-migrate.mjs",
     "db:status": "node scripts/db-status.mjs",
