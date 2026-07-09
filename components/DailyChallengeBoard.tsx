@@ -3,6 +3,12 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 import Link from "next/link"
 
+import type {
+  DailyChallengeState,
+  OverviewAnalytics,
+  SubmitGuessResponse,
+  TrackShareResponse,
+} from "@/lib/backend-contracts"
 import { GameInput } from "@/components/GameInput"
 import { GuessList } from "@/components/GuessList"
 import { ScoreBoard } from "@/components/ScoreBoard"
@@ -19,30 +25,7 @@ import {
 } from "@/components/ui/dialog"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
-import {
-  buildDailyShareText,
-  formatDuration,
-  getDailyRoute,
-  getDailyThemeMessages,
-  getDailyThemeValidator,
-  type DailyChallenge,
-} from "@/lib/daily"
-import {
-  createEmptyGrowthStorage,
-  getAverageCompletionTime,
-  getAverageGuessCount,
-  getDailyCompletionRate,
-  getOrCreateDailyRecord,
-  incrementShareClicks,
-  recordDailyCompletion,
-  sanitizeGrowthStorage,
-  toAnalyticsPayload,
-  type DailyRecord,
-  type GrowthStorage,
-  GROWTH_STORAGE_KEY,
-  upsertAnalyticsAttempt,
-} from "@/lib/growth"
-import { validateGuessWithRules } from "@/lib/game"
+import { formatDuration, getDailyRoute, type DailyChallenge } from "@/lib/daily"
 
 type Feedback = {
   tone: "success" | "error"
@@ -51,42 +34,98 @@ type Feedback = {
 
 type DailyChallengeBoardProps = {
   challenge: DailyChallenge
-  shareBaseUrl: string
 }
 
-const DAILY_CHALLENGE_CACHE_PREFIX = "name100-daily-challenge:"
+function createFallbackState(challenge: DailyChallenge): DailyChallengeState {
+  const now = new Date().toISOString()
 
-function readGrowthStorage() {
-  if (typeof window === "undefined") {
-    return createEmptyGrowthStorage()
+  return {
+    player: {
+      id: "local-fallback",
+      handle: null,
+      isGuest: true,
+      recoveryConfigured: false,
+      createdAt: now,
+      updatedAt: now,
+    },
+    stats: {
+      currentStreak: 0,
+      maxStreak: 0,
+      completedDays: 0,
+      averageCompletionTimeMs: null,
+      averageGuessCount: 0,
+      successRate: 0,
+    },
+    attempt: {
+      id: `fallback-${challenge.date}`,
+      playerId: "local-fallback",
+      sessionId: "fallback-session",
+      date: challenge.date,
+      theme: {
+        themeId: challenge.themeId,
+        title: challenge.shareTitle,
+        categoryLabel: challenge.categoryLabel,
+        targetScore: challenge.targetScore,
+      },
+      status: "in_progress",
+      score: 0,
+      attempts: 0,
+      guessesSubmitted: 0,
+      startedAt: now,
+      completedAt: null,
+      bestTimeMs: null,
+      streakAtCompletion: 0,
+      shareText: "",
+      createdAt: now,
+      updatedAt: now,
+    },
+    acceptedGuesses: [],
+    analytics: {
+      date: challenge.date,
+      attempts: 0,
+      guessesSubmitted: 0,
+      shareClicks: 0,
+      completed: false,
+      completionTimeMs: null,
+    },
+    leaderboardPreview: [],
+  }
+}
+
+function createFallbackOverview(): OverviewAnalytics {
+  return {
+    activePlayers7d: 0,
+    activePlayers30d: 0,
+    sessionsStarted7d: 0,
+    sessionsCompleted7d: 0,
+    averageGuessesPerAttempt: 0,
+    shareRate: 0,
+  }
+}
+
+async function bootstrapSession() {
+  await fetch("/api/session/bootstrap", {
+    method: "POST",
+    credentials: "include",
+  })
+}
+
+async function fetchDailyState(date: string) {
+  const response = await fetch(`/api/daily/${date}`, {
+    credentials: "include",
+  })
+
+  if (!response.ok) {
+    throw new Error("Failed to load the daily challenge.")
   }
 
-  const raw = window.localStorage.getItem(GROWTH_STORAGE_KEY)
-
-  if (!raw) {
-    return createEmptyGrowthStorage()
-  }
-
-  try {
-    return sanitizeGrowthStorage(JSON.parse(raw))
-  } catch {
-    window.localStorage.removeItem(GROWTH_STORAGE_KEY)
-    return createEmptyGrowthStorage()
+  return (await response.json()) as {
+    state: DailyChallengeState
+    overview: OverviewAnalytics
   }
 }
 
-function getTimestamp() {
-  return Date.now()
-}
-
-function getDailyUrl(shareBaseUrl: string, date: string) {
-  return `${shareBaseUrl}${getDailyRoute(date)}`
-}
-
-export function DailyChallengeBoard({
-  challenge,
-  shareBaseUrl,
-}: DailyChallengeBoardProps) {
+export function DailyChallengeBoard({ challenge }: DailyChallengeBoardProps) {
   const isReady = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -97,50 +136,75 @@ export function DailyChallengeBoard({
     return <div className="mx-auto w-full max-w-5xl" />
   }
 
-  return <DailyChallengeBoardClient challenge={challenge} shareBaseUrl={shareBaseUrl} />
+  return <DailyChallengeBoardClient challenge={challenge} />
 }
 
-function DailyChallengeBoardClient({
-  challenge,
-  shareBaseUrl,
-}: DailyChallengeBoardProps) {
-  const [storage, setStorage] = useState<GrowthStorage>(readGrowthStorage)
+function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
+  const [dailyState, setDailyState] = useState<DailyChallengeState>(() =>
+    createFallbackState(challenge)
+  )
+  const [overview, setOverview] = useState<OverviewAnalytics>(createFallbackOverview)
   const [feedback, setFeedback] = useState<Feedback>(null)
   const [loading, setLoading] = useState(false)
+  const [initializing, setInitializing] = useState(true)
   const [copied, setCopied] = useState(false)
   const [shareBounce, setShareBounce] = useState(false)
   const [showResultDialog, setShowResultDialog] = useState(false)
   const lastCompletedState = useRef(false)
 
-  const currentRecord = getOrCreateDailyRecord(storage, challenge.date)
-  const dailyUrl = getDailyUrl(shareBaseUrl, challenge.date)
-  const progress = Math.min((currentRecord.guessedNames.length / challenge.targetScore) * 100, 100)
-  const analyticsPayload = toAnalyticsPayload(storage, challenge.date)
-  const averageCompletionTime = getAverageCompletionTime(storage)
-  const averageGuessCount = getAverageGuessCount(storage)
-  const completionRate = getDailyCompletionRate(storage)
-  const themeValidator = getDailyThemeValidator(challenge.themeId)
-  const themeMessages = getDailyThemeMessages(challenge.themeId)
+  const currentAttempt = dailyState.attempt
+  const progress = Math.min(
+    (dailyState.acceptedGuesses.length / challenge.targetScore) * 100,
+    100
+  )
 
   useEffect(() => {
-    window.localStorage.setItem(GROWTH_STORAGE_KEY, JSON.stringify(storage))
-  }, [storage])
+    let cancelled = false
+
+    async function load() {
+      setInitializing(true)
+
+      try {
+        await bootstrapSession()
+        const response = await fetchDailyState(challenge.date)
+
+        if (cancelled) {
+          return
+        }
+
+        setDailyState(response.state)
+        setOverview(response.overview)
+      } catch {
+        if (cancelled) {
+          return
+        }
+
+        setFeedback({
+          tone: "error",
+          text: "Server sync is unavailable right now. Daily progress may be delayed.",
+        })
+      } finally {
+        if (!cancelled) {
+          setInitializing(false)
+        }
+      }
+    }
+
+    void load()
+
+    return () => {
+      cancelled = true
+    }
+  }, [challenge.date])
 
   useEffect(() => {
-    window.localStorage.setItem(
-      `${DAILY_CHALLENGE_CACHE_PREFIX}${challenge.date}`,
-      JSON.stringify(challenge)
-    )
-  }, [challenge])
-
-  useEffect(() => {
-    if (currentRecord.completed && !lastCompletedState.current) {
+    if (currentAttempt.status === "completed" && !lastCompletedState.current) {
       setShowResultDialog(true)
       setShareBounce(true)
     }
 
-    lastCompletedState.current = currentRecord.completed
-  }, [currentRecord.completed])
+    lastCompletedState.current = currentAttempt.status === "completed"
+  }, [currentAttempt.status])
 
   useEffect(() => {
     if (!shareBounce) {
@@ -152,129 +216,39 @@ function DailyChallengeBoardClient({
     return () => window.clearTimeout(timeout)
   }, [shareBounce])
 
-  function commitStorage(nextStorage: GrowthStorage, nextRecord: DailyRecord) {
-    setStorage({
-      ...nextStorage,
-      lastPlayedDate: challenge.date,
-      playedDatesHistory: nextStorage.playedDatesHistory.includes(challenge.date)
-        ? nextStorage.playedDatesHistory
-        : [challenge.date, ...nextStorage.playedDatesHistory],
-      dailyRecords: {
-        ...nextStorage.dailyRecords,
-        [challenge.date]: nextRecord,
-      },
-    })
-  }
-
   async function handleSubmit(name: string) {
     setLoading(true)
     setCopied(false)
 
     try {
-      const current = getOrCreateDailyRecord(storage, challenge.date)
-      const nextAttempts = current.attempts + 1
-      const startedAt = current.startedAt ?? getTimestamp()
-      const guessesSubmitted = current.guessedNames.length + 1
-      let nextStorage = upsertAnalyticsAttempt(storage, challenge.date, {
-        attempts: nextAttempts,
-        guessesSubmitted,
+      const response = await fetch(`/api/daily/${challenge.date}/guess`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          date: challenge.date,
+          name,
+          clientAttemptId: currentAttempt.id,
+        }),
       })
 
-      const result = await validateGuessWithRules(
-        name,
-        current.guessedQIDs,
-        current.score,
-        undefined,
-        {
-          targetScore: challenge.targetScore,
-          validateEntity: themeValidator,
-          invalidEntityMessage: themeMessages.invalidEntityMessage,
-          successMessage: themeMessages.successMessage,
-        }
-      )
+      const result = (await response.json()) as SubmitGuessResponse | { message?: string }
 
-      if (!result.valid) {
-        setFeedback({
-          tone: "error",
-          text: result.message,
-        })
-
-        commitStorage(nextStorage, {
-          ...getOrCreateDailyRecord(nextStorage, challenge.date),
-          attempts: nextAttempts,
-          targetScore: challenge.targetScore,
-          themeLabel: challenge.categoryLabel,
-          startedAt,
-          lastPlayedAt: getTimestamp(),
-          dailyDataset: [challenge.themeId],
-        })
-        return
+      if (!response.ok || !("state" in result)) {
+        throw new Error(result.message ?? "Failed to submit guess.")
       }
-
-      const finishedNow = result.score >= challenge.targetScore
-      const completedAt = finishedNow ? getTimestamp() : current.completedAt
-      const durationMs =
-        finishedNow && completedAt ? completedAt - startedAt : current.bestTimeMs ?? 0
-
-      if (finishedNow && durationMs > 0) {
-        nextStorage = recordDailyCompletion(nextStorage, challenge.date, durationMs)
-      }
-
-      const streakAtCompletion = finishedNow
-        ? nextStorage.currentStreak
-        : current.streakAtCompletion
-      const bestTimeMs =
-        finishedNow && durationMs > 0
-          ? current.bestTimeMs === null
-            ? durationMs
-            : Math.min(current.bestTimeMs, durationMs)
-          : current.bestTimeMs
-      const shareText =
-        finishedNow && bestTimeMs
-          ? buildDailyShareText({
-              date: challenge.date,
-              score: result.score,
-              targetScore: challenge.targetScore,
-              durationMs: bestTimeMs,
-              streak: streakAtCompletion,
-              shareTitle: challenge.shareTitle,
-              shareLabel: challenge.shareLabel,
-              url: dailyUrl,
-            })
-          : current.shareText
 
       setFeedback({
-        tone: "success",
-        text: finishedNow
-          ? "Challenge complete. Your themed share card is ready."
-          : result.message,
+        tone: result.accepted ? "success" : "error",
+        text: result.message,
       })
-
-      commitStorage(nextStorage, {
-        ...getOrCreateDailyRecord(nextStorage, challenge.date),
-        score: result.score,
-        targetScore: challenge.targetScore,
-        themeLabel: challenge.categoryLabel,
-        guessedQIDs: [...current.guessedQIDs, result.qid],
-        guessedNames: [...current.guessedNames, { qid: result.qid, name: result.name }],
-        attempts: nextAttempts,
-        startedAt,
-        completedAt,
-        bestTimeMs,
-        completed: finishedNow,
-        shareText,
-        lastPlayedAt: getTimestamp(),
-        streakAtCompletion,
-        dailyDataset: [challenge.themeId],
-      })
-
-      if (finishedNow) {
-        setShareBounce(true)
-      }
+      setDailyState(result.state)
     } catch {
       setFeedback({
         tone: "error",
-        text: "Wikidata is unavailable right now. Please try again.",
+        text: "The server could not verify this guess right now. Please try again.",
       })
     } finally {
       setLoading(false)
@@ -282,18 +256,50 @@ function DailyChallengeBoardClient({
   }
 
   async function handleCopyShare() {
-    if (!currentRecord.shareText) {
+    if (!currentAttempt.shareText) {
       return
     }
 
     try {
-      await navigator.clipboard.writeText(currentRecord.shareText)
+      await navigator.clipboard.writeText(currentAttempt.shareText)
       setCopied(true)
-      setStorage((currentStorage) => incrementShareClicks(currentStorage, challenge.date))
+
+      const response = await fetch(`/api/daily/${challenge.date}/share`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          date: challenge.date,
+          attemptId: currentAttempt.id,
+          destination: "copy",
+        }),
+      })
+
+      if (!response.ok) {
+        return
+      }
+
+      const result = (await response.json()) as TrackShareResponse
+
+      setDailyState((current) => ({
+        ...current,
+        analytics: {
+          ...current.analytics,
+          shareClicks: result.shareClicks,
+        },
+      }))
     } catch {
       setCopied(false)
     }
   }
+
+  const sharePreviewHref = `${getDailyRoute(challenge.date)}/share-preview`
+  const completionRate = dailyState.stats.successRate
+  const averageGuessCount = dailyState.stats.averageGuessCount
+  const averageCompletionTime = dailyState.stats.averageCompletionTimeMs
+  const isCompleted = currentAttempt.status === "completed"
 
   return (
     <>
@@ -301,8 +307,8 @@ function DailyChallengeBoardClient({
         <GameInput
           buttonLabel={challenge.promptLabel}
           description={`Today's rule: every answer must match the ${challenge.categoryLabel.toLowerCase()} theme and pass Wikidata validation for ${challenge.date}.`}
-          disabled={currentRecord.completed}
-          loading={loading}
+          disabled={isCompleted || initializing}
+          loading={loading || initializing}
           onSubmit={handleSubmit}
           title={challenge.title}
         />
@@ -314,8 +320,8 @@ function DailyChallengeBoardClient({
                 <Badge variant="secondary">Daily Challenge</Badge>
                 <Badge variant="outline">{challenge.date}</Badge>
                 <Badge variant="outline">{challenge.categoryLabel}</Badge>
-                <Badge variant="success">Streak {storage.currentStreak}</Badge>
-                <Badge variant="outline">Best {storage.maxStreak}</Badge>
+                <Badge variant="success">Streak {dailyState.stats.currentStreak}</Badge>
+                <Badge variant="outline">Best {dailyState.stats.maxStreak}</Badge>
               </div>
               <div className="space-y-3">
                 <CardTitle className="text-3xl sm:text-4xl">{challenge.headline}</CardTitle>
@@ -331,28 +337,28 @@ function DailyChallengeBoardClient({
                     Progress
                   </p>
                   <p className="mt-2 text-2xl font-semibold">
-                    {currentRecord.guessedNames.length}/{challenge.targetScore}
+                    {dailyState.acceptedGuesses.length}/{challenge.targetScore}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                     Attempts
                   </p>
-                  <p className="mt-2 text-2xl font-semibold">{currentRecord.attempts}</p>
+                  <p className="mt-2 text-2xl font-semibold">{currentAttempt.attempts}</p>
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                     Best Time
                   </p>
                   <p className="mt-2 text-2xl font-semibold">
-                    {currentRecord.bestTimeMs ? formatDuration(currentRecord.bestTimeMs) : "--"}
+                    {currentAttempt.bestTimeMs ? formatDuration(currentAttempt.bestTimeMs) : "--"}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                     Share clicks
                   </p>
-                  <p className="mt-2 text-2xl font-semibold">{analyticsPayload.shareClicks}</p>
+                  <p className="mt-2 text-2xl font-semibold">{dailyState.analytics.shareClicks}</p>
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -382,14 +388,14 @@ function DailyChallengeBoardClient({
 
           <ScoreBoard
             description={`Reach ${challenge.targetScore}/${challenge.targetScore} for today's ${challenge.shareLabel} theme.`}
-            score={currentRecord.score}
+            score={currentAttempt.score}
             targetScore={challenge.targetScore}
             title="Today"
-            won={currentRecord.completed}
+            won={isCompleted}
           />
         </section>
 
-        <GuessList guesses={currentRecord.guessedNames} />
+        <GuessList guesses={dailyState.acceptedGuesses} />
 
         {feedback ? (
           <Card
@@ -408,13 +414,13 @@ function DailyChallengeBoardClient({
           </Card>
         ) : null}
 
-        {currentRecord.completed ? (
+        {isCompleted ? (
           <Card className="border-amber-200 bg-amber-50/90 dark:border-amber-900 dark:bg-amber-950/30">
             <CardHeader>
               <div className="flex flex-wrap gap-2">
                 <Badge variant="success">Completed</Badge>
-                <Badge variant="outline">{storage.currentStreak} day streak</Badge>
-                <Badge variant="outline">Max {storage.maxStreak}</Badge>
+                <Badge variant="outline">{dailyState.stats.currentStreak} day streak</Badge>
+                <Badge variant="outline">Max {dailyState.stats.maxStreak}</Badge>
               </div>
               <CardTitle>Celebration screen</CardTitle>
               <CardDescription>
@@ -444,7 +450,7 @@ function DailyChallengeBoardClient({
               </Button>
               <Link
                 className={buttonVariants({ className: "rounded-xl", variant: "outline" })}
-                href={`${getDailyRoute(challenge.date)}/share-preview`}
+                href={sharePreviewHref}
               >
                 Open share preview
               </Link>
@@ -454,9 +460,10 @@ function DailyChallengeBoardClient({
 
         <Card className="border-white/50 bg-white/85 backdrop-blur dark:border-white/10 dark:bg-black/20">
           <CardHeader>
-            <CardTitle>Front-end analytics snapshot</CardTitle>
+            <CardTitle>Server analytics snapshot</CardTitle>
             <CardDescription>
-              Local-only MVP metrics with an API-ready shape for future backend wiring.
+              This view now reflects the backend attempt state and is ready to be backed by a
+              real database next.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -466,20 +473,22 @@ function DailyChallengeBoardClient({
                   Completed
                 </p>
                 <p className="mt-2 text-2xl font-semibold">
-                  {analyticsPayload.completed ? "Yes" : "No"}
+                  {dailyState.analytics.completed ? "Yes" : "No"}
                 </p>
               </div>
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                   Guesses
                 </p>
-                <p className="mt-2 text-2xl font-semibold">{analyticsPayload.guessesSubmitted}</p>
+                <p className="mt-2 text-2xl font-semibold">
+                  {dailyState.analytics.guessesSubmitted}
+                </p>
               </div>
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                   Attempts
                 </p>
-                <p className="mt-2 text-2xl font-semibold">{analyticsPayload.attempts}</p>
+                <p className="mt-2 text-2xl font-semibold">{dailyState.analytics.attempts}</p>
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
@@ -493,15 +502,15 @@ function DailyChallengeBoardClient({
               </div>
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                  Share clicks
+                  Share rate
                 </p>
-                <p className="mt-2 text-2xl font-semibold">{analyticsPayload.shareClicks}</p>
+                <p className="mt-2 text-2xl font-semibold">{overview.shareRate}%</p>
               </div>
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                  Last played
+                  Active players 7d
                 </p>
-                <p className="mt-2 text-2xl font-semibold">{storage.lastPlayedDate ?? "--"}</p>
+                <p className="mt-2 text-2xl font-semibold">{overview.activePlayers7d}</p>
               </div>
             </div>
             <div className="rounded-2xl border border-border/70 bg-background/65 p-4">
@@ -509,12 +518,11 @@ function DailyChallengeBoardClient({
                 API-ready payload
               </p>
               <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                {JSON.stringify(analyticsPayload)}
+                {JSON.stringify(dailyState.analytics)}
               </p>
             </div>
           </CardContent>
         </Card>
-
       </div>
 
       <Dialog onOpenChange={setShowResultDialog} open={showResultDialog}>
@@ -537,7 +545,7 @@ function DailyChallengeBoardClient({
                   Score
                 </p>
                 <p className="mt-2 text-2xl font-semibold">
-                  {currentRecord.score}/{challenge.targetScore}
+                  {currentAttempt.score}/{challenge.targetScore}
                 </p>
               </div>
               <div>
@@ -545,20 +553,22 @@ function DailyChallengeBoardClient({
                   Time
                 </p>
                 <p className="mt-2 text-2xl font-semibold">
-                  {currentRecord.bestTimeMs ? formatDuration(currentRecord.bestTimeMs) : "--"}
+                  {currentAttempt.bestTimeMs ? formatDuration(currentAttempt.bestTimeMs) : "--"}
                 </p>
               </div>
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                   Streak
                 </p>
-                <p className="mt-2 text-2xl font-semibold">{storage.currentStreak} days</p>
+                <p className="mt-2 text-2xl font-semibold">
+                  {dailyState.stats.currentStreak} days
+                </p>
               </div>
             </div>
             <Separator />
             <div className="rounded-2xl border border-border/70 bg-background/80 p-4">
               <pre className="whitespace-pre-wrap text-sm leading-6 text-foreground">
-                {currentRecord.shareText}
+                {currentAttempt.shareText}
               </pre>
             </div>
           </div>

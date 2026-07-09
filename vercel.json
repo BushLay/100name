@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/internal/cron/readiness",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/internal/cron/daily-report",
+      "schedule": "15 0 * * *"
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og"
+
 import { getDailyChallenge } from "@/lib/daily"
 
 type DailyOgImageProps = {
@@ -39,7 +40,7 @@ export default async function DailyOgImage({ params }: DailyOgImageProps) {
             {challenge.title}
           </div>
           <div style={{ display: "flex", fontSize: 34, color: "#4b5563" }}>
-            {date} · {challenge.targetScore} answers · shareable streaks and daily competition.
+            {date} • {challenge.targetScore} answers • shareable streaks and daily competition.
           </div>
         </div>
         <div style={{ display: "flex", gap: "18px", fontSize: 24, color: "#374151" }}>

@@ -2,66 +2,36 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react"
 
+import type { OpenGameState, SubmitOpenGuessResponse } from "@/lib/backend-contracts"
 import { GameInput } from "@/components/GameInput"
 import { GuessList } from "@/components/GuessList"
 import { ScoreBoard } from "@/components/ScoreBoard"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { checkWinCondition, validateGuess } from "@/lib/game"
-
-type StoredGuess = {
-  qid: string
-  name: string
-}
-
-type GameState = {
-  score: number
-  guessedQIDs: string[]
-  guessedNames: StoredGuess[]
-}
+import { WINNING_SCORE, checkWinCondition } from "@/lib/game"
 
 type Feedback = {
   tone: "success" | "error"
   text: string
 } | null
 
-const STORAGE_KEY = "name100-game-state"
+function createFallbackState(): OpenGameState {
+  const now = new Date().toISOString()
 
-function getInitialState(): GameState {
-  if (typeof window === "undefined") {
-    return {
-      score: 0,
-      guessedQIDs: [],
-      guessedNames: [],
-    }
-  }
-
-  const raw = window.localStorage.getItem(STORAGE_KEY)
-
-  if (!raw) {
-    return {
-      score: 0,
-      guessedQIDs: [],
-      guessedNames: [],
-    }
-  }
-
-  try {
-    const parsed = JSON.parse(raw) as Partial<GameState>
-
-    return {
-      score: parsed.score ?? 0,
-      guessedQIDs: parsed.guessedQIDs ?? [],
-      guessedNames: parsed.guessedNames ?? [],
-    }
-  } catch {
-    window.localStorage.removeItem(STORAGE_KEY)
-
-    return {
-      score: 0,
-      guessedQIDs: [],
-      guessedNames: [],
-    }
+  return {
+    player: {
+      id: "local-fallback",
+      handle: null,
+      isGuest: true,
+      recoveryConfigured: false,
+      createdAt: now,
+      updatedAt: now,
+    },
+    score: 0,
+    targetScore: WINNING_SCORE,
+    acceptedGuesses: [],
+    completed: false,
+    updatedAt: now,
   }
 }
 
@@ -80,34 +50,76 @@ export function GameBoard() {
 }
 
 function GameBoardClient() {
-  const [gameState, setGameState] = useState<GameState>(getInitialState)
+  const [gameState, setGameState] = useState<OpenGameState>(createFallbackState)
   const [loading, setLoading] = useState(false)
+  const [initializing, setInitializing] = useState(true)
   const [feedback, setFeedback] = useState<Feedback>(null)
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState))
-  }, [gameState])
+    let cancelled = false
+
+    async function load() {
+      setInitializing(true)
+
+      try {
+        const response = await fetch("/api/open", {
+          credentials: "include",
+        })
+
+        if (!response.ok) {
+          throw new Error("Failed to load open game state.")
+        }
+
+        const payload = (await response.json()) as { state: OpenGameState }
+
+        if (!cancelled) {
+          setGameState(payload.state)
+        }
+      } catch {
+        if (!cancelled) {
+          setFeedback({
+            tone: "error",
+            text: "Open mode sync is unavailable right now. Please try again.",
+          })
+        }
+      } finally {
+        if (!cancelled) {
+          setInitializing(false)
+        }
+      }
+    }
+
+    void load()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   async function handleSubmit(name: string) {
     setLoading(true)
 
     try {
-      const result = await validateGuess(name, gameState.guessedQIDs, gameState.score)
-
-      setFeedback({
-        tone: result.valid ? "success" : "error",
-        text: result.message,
+      const response = await fetch("/api/open/guess", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name }),
       })
 
-      if (!result.valid) {
-        return
+      const result = (await response.json()) as SubmitOpenGuessResponse | { message?: string }
+
+      if (!response.ok || !("state" in result)) {
+        throw new Error(result.message ?? "Failed to submit open-mode guess.")
       }
 
-      setGameState((current) => ({
-        score: result.score,
-        guessedQIDs: [...current.guessedQIDs, result.qid],
-        guessedNames: [...current.guessedNames, { qid: result.qid, name: result.name }],
-      }))
+      setFeedback({
+        tone: result.accepted ? "success" : "error",
+        text: result.message,
+      })
+      setGameState(result.state)
     } catch {
       setFeedback({
         tone: "error",
@@ -119,16 +131,17 @@ function GameBoardClient() {
   }
 
   const won = checkWinCondition(gameState.score)
+
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
-      <GameInput disabled={won} loading={loading} onSubmit={handleSubmit} />
+      <GameInput disabled={won || initializing} loading={loading || initializing} onSubmit={handleSubmit} />
 
       <section className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
         <Card className="overflow-hidden border-white/60 bg-white/88 backdrop-blur dark:border-white/10 dark:bg-black/25">
           <CardContent className="p-6 sm:p-8">
             <div className="flex flex-col gap-4">
               <Badge className="w-fit" variant="secondary">
-                Wikidata MVP
+                Wikidata Open Mode
               </Badge>
               <div className="space-y-3">
                 <h1 className="max-w-2xl text-4xl font-semibold tracking-tight sm:text-5xl">
@@ -151,7 +164,7 @@ function GameBoardClient() {
         <ScoreBoard score={gameState.score} won={won} />
       </section>
 
-      <GuessList guesses={gameState.guessedNames} />
+      <GuessList guesses={gameState.acceptedGuesses} />
 
       {feedback ? (
         <Card
@@ -175,7 +188,7 @@ function GameBoardClient() {
           <CardContent className="flex flex-col gap-2 p-5">
             <p className="text-lg font-semibold">You reached 100 points.</p>
             <p className="text-sm text-muted-foreground">
-              Refresh safely anytime. Your progress is stored locally in this browser.
+              Your open-mode progress is now backed by the active server store.
             </p>
           </CardContent>
         </Card>

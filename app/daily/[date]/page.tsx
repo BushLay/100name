@@ -5,13 +5,10 @@ import { DailyChallengeBoard } from "@/components/DailyChallengeBoard"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getDailyChallenge, getDailyRoute, getIndexableDailyDates, isValidChallengeDate } from "@/lib/daily"
+import { getSiteUrl } from "@/lib/site"
 
 type DailyPageProps = {
   params: Promise<{ date: string }>
-}
-
-function getSiteUrl() {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com"
 }
 
 export async function generateStaticParams() {
@@ -87,7 +84,7 @@ export default async function DailyPage({ params }: DailyPageProps) {
         </Card>
       </div>
 
-      <DailyChallengeBoard challenge={challenge} shareBaseUrl={getSiteUrl()} />
+      <DailyChallengeBoard challenge={challenge} />
 
       <div className="mx-auto mt-6 w-full max-w-5xl">
         <Card className="border-white/50 bg-white/85 backdrop-blur dark:border-white/10 dark:bg-black/20">

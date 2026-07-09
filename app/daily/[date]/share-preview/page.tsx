@@ -5,7 +5,12 @@ import { notFound } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { getDailyChallenge, getDailyRoute, isValidChallengeDate } from "@/lib/daily"
+import {
+  buildDailyShareText,
+  getDailyChallenge,
+  getDailyRoute,
+  isValidChallengeDate,
+} from "@/lib/daily"
 
 type SharePreviewPageProps = {
   params: Promise<{ date: string }>
@@ -35,6 +40,16 @@ export default async function SharePreviewPage({ params }: SharePreviewPageProps
   }
 
   const challenge = getDailyChallenge(date)
+  const previewShareText = buildDailyShareText({
+    date,
+    score: challenge.targetScore,
+    targetScore: challenge.targetScore,
+    durationMs: 133000,
+    streak: 5,
+    shareTitle: challenge.shareTitle,
+    shareLabel: challenge.shareLabel,
+    url: getDailyRoute(date),
+  })
 
   return (
     <main className="min-h-svh bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.18),transparent_30%),radial-gradient(circle_at_right,rgba(14,165,233,0.18),transparent_28%),linear-gradient(180deg,#fff8f1_0%,#f7f1ff_48%,#eef6ff_100%)] px-4 py-8 text-foreground dark:bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.12),transparent_30%),radial-gradient(circle_at_right,rgba(56,189,248,0.16),transparent_28%),linear-gradient(180deg,#141226_0%,#111827_48%,#0b1220_100%)] sm:px-6 lg:px-8">
@@ -55,15 +70,7 @@ export default async function SharePreviewPage({ params }: SharePreviewPageProps
           <CardContent className="space-y-4">
             <div className="rounded-3xl border border-border/70 bg-background/80 p-6">
               <pre className="whitespace-pre-wrap text-sm leading-7 text-foreground">
-{`Women Guess Game ${date}
-${challenge.shareTitle}
-
-🟩🟩🟩🟩🟩 ${challenge.targetScore}/${challenge.targetScore}
-⏱ 2m 13s
-🔥 Streak: 5 days
-
-I found ${challenge.targetScore}/${challenge.targetScore} ${challenge.shareLabel} today.
-Play: ${getDailyRoute(date)}`}
+                {previewShareText}
               </pre>
             </div>
             <Link

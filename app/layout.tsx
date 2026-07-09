@@ -1,19 +1,47 @@
-import { Geist, Geist_Mono } from "next/font/google"
+import localFont from "next/font/local"
 import type { Metadata } from "next"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { getSiteMetadataBase } from "@/lib/site"
 import { cn } from "@/lib/utils"
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })
+const geist = localFont({
+  src: [
+    {
+      path: "./fonts/geist-sans-latin.woff2",
+      style: "normal",
+      weight: "100 900",
+    },
+    {
+      path: "./fonts/geist-sans-latin-ext.woff2",
+      style: "normal",
+      weight: "100 900",
+    },
+  ],
+  display: "swap",
+  variable: "--font-sans",
+})
 
-const fontMono = Geist_Mono({
-  subsets: ["latin"],
+const fontMono = localFont({
+  src: [
+    {
+      path: "./fonts/geist-mono-latin.woff2",
+      style: "normal",
+      weight: "100 900",
+    },
+    {
+      path: "./fonts/geist-mono-latin-ext.woff2",
+      style: "normal",
+      weight: "100 900",
+    },
+  ],
+  display: "swap",
   variable: "--font-mono",
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com"),
+  metadataBase: getSiteMetadataBase(),
   title: {
     default: "Name 100",
     template: "%s | Name 100",

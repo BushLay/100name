@@ -1,8 +1,5 @@
 import type { MetadataRoute } from "next"
-
-function getSiteUrl() {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com"
-}
+import { getSiteUrl } from "@/lib/site"
 
 export default function robots(): MetadataRoute.Robots {
   return {

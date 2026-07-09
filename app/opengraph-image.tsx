@@ -70,7 +70,7 @@ export default function OpenGraphImage() {
           }}
         >
           <div>SEO-ready daily routes</div>
-          <div>Fixed answer set</div>
+          <div>Open-ended daily themes</div>
           <div>Shareable results</div>
         </div>
       </div>

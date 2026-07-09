@@ -9,6 +9,7 @@ import {
   getDailyChallenge,
   getDailyRoute,
   getDailyThemeMessages,
+  getTodayDateString,
   getDailyThemeValidator,
   isValidChallengeDate,
 } from "./daily.ts"
@@ -40,6 +41,7 @@ test("daily helpers format urls, durations, and share text", () => {
   assert.equal(formatDuration(133000), "2m 13s")
   assert.equal(isValidChallengeDate("2026-07-01"), true)
   assert.equal(isValidChallengeDate("2026/07/01"), false)
+  assert.equal(getTodayDateString(new Date(2026, 6, 8, 0, 30, 0)), "2026-07-08")
 
   const text = buildDailyShareText({
     date: "2026-07-01",
@@ -54,6 +56,9 @@ test("daily helpers format urls, durations, and share text", () => {
   assert.match(text, /20\/20/)
   assert.match(text, /Female actors challenge/)
   assert.match(text, /female actors today/i)
+  assert.match(text, /🟩🟩🟩🟩🟩/)
+  assert.match(text, /⏱ 2m 13s/)
+  assert.match(text, /🔥 Streak: 0 days/)
 })
 
 test("theme validators and messages are available for a daily challenge", () => {
