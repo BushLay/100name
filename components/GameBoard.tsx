@@ -190,7 +190,7 @@ function GameBoardClient() {
                   />
                 </div>
                 <h1 className="max-w-2xl text-4xl font-semibold tracking-tight sm:text-5xl">
-                  Build a 100-name streak.
+                  Name 100: Daily Women Name Challenge
                 </h1>
                 <p className="max-w-2xl text-base leading-7 text-muted-foreground">
                   Submit a full name, let Wikidata judge it live, and keep stacking verified women until you clear the board.

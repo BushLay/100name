@@ -55,6 +55,8 @@ export type DailyChallenge = {
   faq: DailyFaqItem[]
 }
 
+export const DAILY_CHALLENGE_START_DATE = "2026-01-03"
+
 const DAILY_THEMES: DailyThemeDefinition[] = [
   {
     id: "female-actors",
@@ -362,4 +364,39 @@ export function getIndexableDailyDates(centerDate = "2026-07-02", radius = 180) 
     date.setUTCDate(baseDate.getUTCDate() + offset - radius)
     return date.toISOString().slice(0, 10)
   })
+}
+
+export function compareChallengeDates(left: string, right: string) {
+  return left.localeCompare(right)
+}
+
+export function isDailyChallengeOpen(date: string, today = getTodayDateString()) {
+  if (!isValidChallengeDate(date)) {
+    return false
+  }
+
+  return (
+    compareChallengeDates(date, DAILY_CHALLENGE_START_DATE) >= 0 &&
+    compareChallengeDates(date, today) <= 0
+  )
+}
+
+export function getOpenDailyDates(
+  today = getTodayDateString(),
+  startDate = DAILY_CHALLENGE_START_DATE
+) {
+  if (compareChallengeDates(today, startDate) < 0) {
+    return []
+  }
+
+  const dates: string[] = []
+  const current = new Date(`${startDate}T00:00:00Z`)
+  const end = new Date(`${today}T00:00:00Z`)
+
+  while (current.getTime() <= end.getTime()) {
+    dates.push(current.toISOString().slice(0, 10))
+    current.setUTCDate(current.getUTCDate() + 1)
+  }
+
+  return dates
 }

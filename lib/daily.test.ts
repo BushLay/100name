@@ -2,16 +2,19 @@ import assert from "node:assert/strict"
 import test from "node:test"
 
 import {
+  DAILY_CHALLENGE_START_DATE,
   buildDailyShareText,
   fetchDailyDataset,
   formatDuration,
   generateDailySeed,
   getDailyChallenge,
   getDailyRoute,
+  getOpenDailyDates,
   getDailyThemeMessages,
   getDailyThemeQueryValidator,
   getTodayDateString,
   getDailyThemeValidator,
+  isDailyChallengeOpen,
   isValidChallengeDate,
 } from "./daily.ts"
 
@@ -92,4 +95,14 @@ test("curated daily query validators return short stable qids", () => {
   assert.equal(result?.name, "Rebecca Ferguson")
   assert.equal(result?.qid.length <= 32, true)
   assert.match(result?.qid ?? "", /^cur:/)
+})
+
+test("open daily date helpers exclude future dates", () => {
+  const openDates = getOpenDailyDates("2026-07-11")
+
+  assert.equal(openDates[0], DAILY_CHALLENGE_START_DATE)
+  assert.equal(openDates.includes("2026-07-11"), true)
+  assert.equal(openDates.includes("2026-07-12"), false)
+  assert.equal(isDailyChallengeOpen("2026-07-11", "2026-07-11"), true)
+  assert.equal(isDailyChallengeOpen("2026-07-12", "2026-07-11"), false)
 })

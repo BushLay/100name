@@ -9,6 +9,7 @@ import {
   buildDailyShareText,
   getDailyChallenge,
   getDailyRoute,
+  isDailyChallengeOpen,
   isValidChallengeDate,
 } from "@/lib/daily"
 
@@ -20,6 +21,17 @@ export async function generateMetadata({
   params,
 }: SharePreviewPageProps): Promise<Metadata> {
   const { date } = await params
+
+  if (!isValidChallengeDate(date) || !isDailyChallengeOpen(date)) {
+    return {
+      title: "Share Preview",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    }
+  }
+
   const challenge = getDailyChallenge(date)
 
   return {
@@ -35,7 +47,7 @@ export async function generateMetadata({
 export default async function SharePreviewPage({ params }: SharePreviewPageProps) {
   const { date } = await params
 
-  if (!isValidChallengeDate(date)) {
+  if (!isValidChallengeDate(date) || !isDailyChallengeOpen(date)) {
     notFound()
   }
 

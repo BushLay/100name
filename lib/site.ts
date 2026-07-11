@@ -1,4 +1,5 @@
-const FALLBACK_SITE_URL = "https://example.com"
+export const CANONICAL_SITE_URL = "https://www.100names.top"
+const FALLBACK_SITE_URL = CANONICAL_SITE_URL
 
 function trimTrailingSlash(value: string) {
   return value.endsWith("/") ? value.slice(0, -1) : value
@@ -15,5 +16,14 @@ export function getSiteUrl() {
 }
 
 export function getSiteMetadataBase() {
-  return new URL(getSiteUrl())
+  return new URL(CANONICAL_SITE_URL)
+}
+
+export function getCanonicalSiteUrl() {
+  return CANONICAL_SITE_URL
+}
+
+export function buildCanonicalUrl(path = "/") {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`
+  return `${CANONICAL_SITE_URL}${normalizedPath === "/" ? "/" : normalizedPath}`
 }

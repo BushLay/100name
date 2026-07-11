@@ -4,7 +4,7 @@ import type { Metadata } from "next"
 import "./globals.css"
 import { SiteChrome } from "@/components/SiteChrome"
 import { ThemeProvider } from "@/components/theme-provider"
-import { getSiteMetadataBase } from "@/lib/site"
+import { buildCanonicalUrl, getSiteMetadataBase } from "@/lib/site"
 import { cn } from "@/lib/utils"
 
 const geist = localFont({
@@ -44,21 +44,26 @@ const fontMono = localFont({
 export const metadata: Metadata = {
   metadataBase: getSiteMetadataBase(),
   title: {
-    default: "Name 100",
+    default: "Name 100: Daily Women Name Challenge",
     template: "%s | Name 100",
   },
-  description: "A Wikidata-powered daily women name challenge with share and SEO support.",
+  description:
+    "Name 100 is a Wikidata-powered daily women name challenge and open practice game with verified answers, share cards, and leaderboards.",
+  alternates: {
+    canonical: buildCanonicalUrl("/"),
+  },
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",
     apple: "/logo.png",
   },
   openGraph: {
-    title: "Name 100",
+    title: "Name 100: Daily Women Name Challenge",
     description:
-      "Play a deterministic daily women name challenge, finish 100 answers, and share your result.",
+      "Play a deterministic daily women name challenge, finish 100 answers in open mode, and share your result.",
     type: "website",
     siteName: "Name 100",
+    url: buildCanonicalUrl("/"),
   },
   robots: {
     index: true,
