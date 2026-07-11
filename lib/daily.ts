@@ -1,5 +1,9 @@
 import type { GuessRuleValidator } from "./game.ts"
 import {
+  SILO_SEASON_3_CAST_LIBRARY,
+  buildCuratedPersonValidator,
+} from "./curated-answer-libraries.ts"
+import {
   validateFemaleActor,
   validateFemaleDirector,
   validateFemaleFictionalCharacter,
@@ -11,6 +15,7 @@ export type DailyThemeId =
   | "female-fictional-characters"
   | "female-directors"
   | "female-singers"
+  | "silo-season-3-cast"
 
 export type DailyFaqItem = {
   question: string
@@ -180,7 +185,44 @@ const DAILY_THEMES: DailyThemeDefinition[] = [
     ],
     validator: validateFemaleSinger,
   },
+  {
+    id: "silo-season-3-cast",
+    title: "Silo Season 3 Cast Challenge",
+    headline: "Name actors from the Silo Season 3 cast list.",
+    description:
+      "Today's special challenge uses a curated cast list for Silo Season 3. Enter one credited cast member at a time and clear all nine featured names.",
+    categoryLabel: "Silo Season 3 cast",
+    promptLabel: "Submit a Silo cast member",
+    shareLabel: "Silo Season 3 cast members",
+    shareTitle: "Silo Season 3 cast challenge",
+    targetScore: SILO_SEASON_3_CAST_LIBRARY.entries.length,
+    invalidEntityMessage:
+      "That answer is not in today's Silo Season 3 cast list.",
+    successMessage: "Correct Silo cast member added to today's board.",
+    faq: [
+      {
+        question: "What counts today?",
+        answer:
+          "Only credited cast members from the curated Silo Season 3 answer list count.",
+      },
+      {
+        question: "Do I need the character name too?",
+        answer:
+          "No. Enter the actor's name, and the game will match it against today's cast list.",
+      },
+      {
+        question: "Why is the target lower today?",
+        answer:
+          "This is a fixed cast challenge built from a curated source, so the board size matches the answer list.",
+      },
+    ],
+    validator: buildCuratedPersonValidator(SILO_SEASON_3_CAST_LIBRARY),
+  },
 ]
+
+const DAILY_THEME_OVERRIDES: Partial<Record<string, DailyThemeId>> = {
+  "2026-07-11": "silo-season-3-cast",
+}
 
 export function isValidChallengeDate(date: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(date)
@@ -213,6 +255,16 @@ export function fetchDailyDataset(seed: number) {
   return DAILY_THEMES[seed % DAILY_THEMES.length]
 }
 
+export function getDailyThemeForDate(date: string) {
+  const overrideThemeId = DAILY_THEME_OVERRIDES[date]
+
+  if (overrideThemeId) {
+    return getDailyThemeDefinition(overrideThemeId)
+  }
+
+  return fetchDailyDataset(generateDailySeed(date))
+}
+
 export function getDailyThemeDefinition(themeId: DailyThemeId) {
   return DAILY_THEMES.find((theme) => theme.id === themeId) ?? DAILY_THEMES[0]
 }
@@ -232,7 +284,7 @@ export function getDailyThemeMessages(themeId: DailyThemeId) {
 
 export function getDailyChallenge(date: string): DailyChallenge {
   const seed = generateDailySeed(date)
-  const theme = fetchDailyDataset(seed)
+  const theme = getDailyThemeForDate(date)
 
   return {
     date,

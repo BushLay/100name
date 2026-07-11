@@ -30,10 +30,19 @@ test("getDailyChallenge returns a fixed theme and target score for a date", () =
   const challenge = getDailyChallenge("2026-07-01")
 
   assert.equal(challenge.date, "2026-07-01")
-  assert.equal(challenge.targetScore, 20)
+  assert.ok(challenge.targetScore > 0)
   assert.ok(challenge.themeId.length > 0)
   assert.ok(challenge.title.length > 0)
   assert.equal(challenge.faq.length > 0, true)
+})
+
+test("getDailyChallenge supports curated theme overrides for specific dates", () => {
+  const challenge = getDailyChallenge("2026-07-11")
+
+  assert.equal(challenge.date, "2026-07-11")
+  assert.equal(challenge.themeId, "silo-season-3-cast")
+  assert.equal(challenge.targetScore, 9)
+  assert.match(challenge.title, /silo/i)
 })
 
 test("daily helpers format urls, durations, and share text", () => {

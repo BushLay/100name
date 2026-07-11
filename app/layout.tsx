@@ -2,6 +2,7 @@ import localFont from "next/font/local"
 import type { Metadata } from "next"
 
 import "./globals.css"
+import { SiteChrome } from "@/components/SiteChrome"
 import { ThemeProvider } from "@/components/theme-provider"
 import { getSiteMetadataBase } from "@/lib/site"
 import { cn } from "@/lib/utils"
@@ -77,7 +78,9 @@ export default function RootLayout({
       className={cn("antialiased", fontMono.variable, "font-sans", geist.variable)}
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <SiteChrome>{children}</SiteChrome>
+        </ThemeProvider>
       </body>
     </html>
   )

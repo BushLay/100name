@@ -8,7 +8,6 @@ import type {
   DailyLeaderboardEntry,
   LeaderboardSummaryResponse,
   PlayerHistoryEntry,
-  RequestMagicLinkResponse,
   RecoverSessionResponse,
 } from "@/lib/backend-contracts"
 import { Badge } from "@/components/ui/badge"
@@ -164,8 +163,6 @@ export function LeaderboardBoard() {
   const [recoverHandleInput, setRecoverHandleInput] = useState("")
   const [recoveryCodeInput, setRecoveryCodeInput] = useState("")
   const [latestRecoveryCode, setLatestRecoveryCode] = useState<string | null>(null)
-  const [emailInput, setEmailInput] = useState("")
-  const [magicLinkPreviewUrl, setMagicLinkPreviewUrl] = useState<string | null>(null)
 
   async function loadLeaderboardData(date: string) {
     const [summaryResponse, dailyResponse] = await Promise.all([
@@ -208,7 +205,6 @@ export function LeaderboardBoard() {
         setDailyEntries(nextState.dailyEntries)
         setHandleInput(nextState.summary.player.handle ?? "")
         setRecoverHandleInput(nextState.summary.player.handle ?? "")
-        setEmailInput(nextState.summary.emailAuth.email ?? "")
       } catch {
         if (!cancelled) {
           setError("Leaderboard sync is temporarily unavailable.")
@@ -258,7 +254,6 @@ export function LeaderboardBoard() {
       setDailyEntries(nextState.dailyEntries)
       setHandleInput(nextState.summary.player.handle ?? "")
       setRecoverHandleInput(nextState.summary.player.handle ?? "")
-      setEmailInput(nextState.summary.emailAuth.email ?? "")
     } catch (claimError) {
       setIdentityError(
         claimError instanceof Error ? claimError.message : "Failed to claim identity."
@@ -301,55 +296,9 @@ export function LeaderboardBoard() {
       setDailyEntries(nextState.dailyEntries)
       setHandleInput(nextState.summary.player.handle ?? "")
       setRecoverHandleInput(nextState.summary.player.handle ?? "")
-      setEmailInput(nextState.summary.emailAuth.email ?? "")
     } catch (recoverError) {
       setIdentityError(
         recoverError instanceof Error ? recoverError.message : "Failed to recover session."
-      )
-    } finally {
-      setIdentityLoading(false)
-    }
-  }
-
-  async function handleRequestMagicLink(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setIdentityLoading(true)
-    setIdentityError(null)
-    setIdentitySuccess(null)
-
-    try {
-      const response = await fetch("/api/session/email/request", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: emailInput,
-        }),
-      })
-      const result = (await response.json()) as RequestMagicLinkResponse & { message?: string }
-
-      if (!response.ok || !("expiresAt" in result)) {
-        throw new Error(result.message ?? "Failed to request magic link.")
-      }
-
-      setMagicLinkPreviewUrl(result.previewUrl)
-      setIdentitySuccess(
-        result.mode === "login"
-          ? "Magic link sent for sign-in. Check your inbox."
-          : "Magic link sent. Open it to verify this email for the current player."
-      )
-
-      const nextState = await loadLeaderboardData(today)
-      setSummary(nextState.summary)
-      setDailyEntries(nextState.dailyEntries)
-      setHandleInput(nextState.summary.player.handle ?? "")
-      setRecoverHandleInput(nextState.summary.player.handle ?? "")
-      setEmailInput(nextState.summary.emailAuth.email ?? "")
-    } catch (magicLinkError) {
-      setIdentityError(
-        magicLinkError instanceof Error ? magicLinkError.message : "Failed to request magic link."
       )
     } finally {
       setIdentityLoading(false)
@@ -423,43 +372,44 @@ export function LeaderboardBoard() {
         <CardHeader>
           <CardTitle>Identity and recovery</CardTitle>
           <CardDescription>
-            Claim a permanent handle and keep a recovery code so this player history can move
-            across browsers and devices.
+            Save a public player name and one recovery code so your progress, streaks, and
+            leaderboard identity can survive browser changes and new devices.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-6 lg:grid-cols-3">
+        <CardContent className="grid gap-6 lg:grid-cols-2">
           <form className="space-y-4" onSubmit={handleClaimIdentity}>
             <div className="space-y-2">
-              <p className="text-sm font-medium">Claim or rotate your identity</p>
+              <p className="text-sm font-medium">Choose your public player name</p>
               <Input
                 autoComplete="username"
                 disabled={identityLoading}
                 onChange={(event) => setHandleInput(event.target.value)}
-                placeholder="your_handle"
+                placeholder="your_name"
                 value={handleInput}
               />
               <p className="text-xs text-muted-foreground">
-                Use 3-20 lowercase letters, numbers, or underscores.
+                This is the name shown on the leaderboard. Use 3-20 lowercase letters,
+                numbers, or underscores.
               </p>
             </div>
             <Button disabled={identityLoading} type="submit">
-              {identityLoading ? "Saving..." : "Save handle and issue recovery code"}
+              {identityLoading ? "Saving..." : "Save name and generate recovery code"}
             </Button>
             {summary.player.recoveryConfigured ? (
               <p className="text-xs text-muted-foreground">
-                Saving again will rotate the recovery code for the current player.
+                Saving again rotates the recovery code for this player.
               </p>
             ) : null}
           </form>
 
           <form className="space-y-4" onSubmit={handleRecoverSession}>
             <div className="space-y-2">
-              <p className="text-sm font-medium">Recover an existing player</p>
+              <p className="text-sm font-medium">Restore your saved progress</p>
               <Input
                 autoComplete="username"
                 disabled={identityLoading}
                 onChange={(event) => setRecoverHandleInput(event.target.value)}
-                placeholder="your_handle"
+                placeholder="your_name"
                 value={recoverHandleInput}
               />
               <Input
@@ -469,69 +419,44 @@ export function LeaderboardBoard() {
                 placeholder="ABCD-EFGH-JKLM"
                 value={recoveryCodeInput}
               />
+              <p className="text-xs text-muted-foreground">
+                Enter your public player name together with the recovery code you saved
+                earlier.
+              </p>
             </div>
             <Button disabled={identityLoading} type="submit" variant="outline">
-              {identityLoading ? "Recovering..." : "Recover player"}
+              {identityLoading ? "Restoring..." : "Restore progress"}
             </Button>
-          </form>
-
-          <form className="space-y-4" onSubmit={handleRequestMagicLink}>
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Email magic link</p>
-              <Input
-                autoComplete="email"
-                disabled={identityLoading}
-                onChange={(event) => setEmailInput(event.target.value)}
-                placeholder="you@example.com"
-                value={emailInput}
-              />
-              <p className="text-xs text-muted-foreground">
-                Link an email to this player or request sign-in for an existing email-based
-                player.
-              </p>
-            </div>
-            <Button disabled={identityLoading} type="submit" variant="secondary">
-              {identityLoading ? "Sending..." : "Send magic link"}
-            </Button>
-            {summary.emailAuth.email ? (
-              <p className="text-xs text-muted-foreground">
-                Current email: {summary.emailAuth.email}
-                {summary.emailAuth.verified ? " (verified)" : " (awaiting verification)"}
-              </p>
-            ) : null}
           </form>
 
           {latestRecoveryCode ? (
             <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-sm dark:border-amber-900 dark:bg-amber-950/20 lg:col-span-2">
-              <p className="font-medium">Recovery code</p>
+              <p className="font-medium">Your recovery code</p>
               <p className="mt-2 font-mono text-lg tracking-[0.18em]">{latestRecoveryCode}</p>
               <p className="mt-2 text-muted-foreground">
-                This is only shown when it is issued. Store it outside the browser before
-                leaving this page.
+                This code is only shown once. Save it somewhere safe before leaving this
+                page, or you may not be able to restore this player later.
               </p>
             </div>
           ) : null}
 
-          {magicLinkPreviewUrl ? (
-            <div className="rounded-2xl border border-sky-200 bg-sky-50/80 p-4 text-sm dark:border-sky-900 dark:bg-sky-950/20 lg:col-span-3">
-              <p className="font-medium">Local preview link</p>
-              <a className="mt-2 block break-all text-sky-700 underline dark:text-sky-300" href={magicLinkPreviewUrl}>
-                {magicLinkPreviewUrl}
-              </a>
-              <p className="mt-2 text-muted-foreground">
-                This preview is shown only when email delivery runs in local log mode.
-              </p>
-            </div>
-          ) : null}
+          <div className="rounded-2xl border border-sky-200 bg-sky-50/80 p-4 text-sm dark:border-sky-900 dark:bg-sky-950/20 lg:col-span-2">
+            <p className="font-medium">Account system for this release</p>
+            <p className="mt-2 text-muted-foreground">
+              This version uses public player names plus recovery codes. Email sign-in is
+              not enabled yet, so keep your recovery code if you want to move this progress
+              to a new browser or device.
+            </p>
+          </div>
 
           {identityError ? (
-            <div className="rounded-2xl border border-red-200 bg-red-50/80 p-4 text-sm font-medium dark:border-red-900 dark:bg-red-950/20 lg:col-span-3">
+            <div className="rounded-2xl border border-red-200 bg-red-50/80 p-4 text-sm font-medium dark:border-red-900 dark:bg-red-950/20 lg:col-span-2">
               {identityError}
             </div>
           ) : null}
 
           {identitySuccess ? (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4 text-sm font-medium dark:border-emerald-900 dark:bg-emerald-950/20 lg:col-span-3">
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4 text-sm font-medium dark:border-emerald-900 dark:bg-emerald-950/20 lg:col-span-2">
               {identitySuccess}
             </div>
           ) : null}
