@@ -216,7 +216,7 @@ test("validateGuessWithRules supports curated query validators without Wikidata 
         if (query === "Rebecca Ferguson") {
           return {
             valid: true,
-            qid: "curated:silo-season-3-cast:rebecca-ferguson",
+            qid: "cur:ss3c:3",
             name: "Rebecca Ferguson",
           }
         }

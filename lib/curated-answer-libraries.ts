@@ -89,6 +89,19 @@ function normalizeAnswerName(value: string) {
     .trim()
 }
 
+function buildCuratedQid(libraryId: string, index: number) {
+  const prefix =
+    libraryId
+      .split("-")
+      .map((segment) => segment.replace(/[^a-z0-9]/gi, ""))
+      .filter(Boolean)
+      .map((segment) => segment.match(/^\d+$/) ? segment : segment[0])
+      .join("")
+      .toLowerCase() || "cur"
+
+  return `cur:${prefix}:${index + 1}`
+}
+
 function getEntityCandidateNames(entity: WikidataEntity | null) {
   if (!entity) {
     return []
@@ -140,10 +153,10 @@ export function buildCuratedPersonValidator(
 export function buildCuratedPersonQueryValidator(
   library: CuratedAnswerLibrary
 ): GuessQueryValidator {
-  const acceptedEntries = library.entries.map((entry) => ({
+  const acceptedEntries = library.entries.map((entry, index) => ({
     ...entry,
     normalizedAcceptedNames: entry.acceptedNames.map(normalizeAnswerName),
-    qid: `curated:${library.id}:${normalizeAnswerName(entry.canonicalName).replace(/\s+/g, "-")}`,
+    qid: buildCuratedQid(library.id, index),
   }))
 
   return (query: string): GuessCandidate => {

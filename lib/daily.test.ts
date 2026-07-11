@@ -9,6 +9,7 @@ import {
   getDailyChallenge,
   getDailyRoute,
   getDailyThemeMessages,
+  getDailyThemeQueryValidator,
   getTodayDateString,
   getDailyThemeValidator,
   isValidChallengeDate,
@@ -78,4 +79,17 @@ test("theme validators and messages are available for a daily challenge", () => 
   assert.equal(typeof validator, "function")
   assert.ok(messages.invalidEntityMessage.length > 0)
   assert.ok(messages.successMessage.length > 0)
+})
+
+test("curated daily query validators return short stable qids", () => {
+  const queryValidator = getDailyThemeQueryValidator("silo-season-3-cast")
+
+  assert.equal(typeof queryValidator, "function")
+
+  const result = queryValidator?.("Rebecca Ferguson")
+
+  assert.equal(result?.valid, true)
+  assert.equal(result?.name, "Rebecca Ferguson")
+  assert.equal(result?.qid.length <= 32, true)
+  assert.match(result?.qid ?? "", /^cur:/)
 })
