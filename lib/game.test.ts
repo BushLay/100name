@@ -186,3 +186,54 @@ test("validateGuessWithRules supports themed target counts and validators", asyn
   assert.equal(result.won, true)
   assert.match(result.message, /correct actor added/i)
 })
+
+test("validateGuessWithRules supports curated query validators without Wikidata lookup", async () => {
+  let searchCalls = 0
+  let entityCalls = 0
+
+  const dependencies: ValidationDependencies = {
+    async searchEntity(name) {
+      searchCalls += 1
+      return { valid: true, qid: "Q123", name }
+    },
+    async getEntityData() {
+      entityCalls += 1
+      return null
+    },
+    validateFemaleHuman() {
+      return { valid: false, qid: "", name: "" }
+    },
+  }
+
+  const result = await validateGuessWithRules(
+    "Rebecca Ferguson",
+    [],
+    0,
+    dependencies,
+    {
+      targetScore: 9,
+      validateQuery(query) {
+        if (query === "Rebecca Ferguson") {
+          return {
+            valid: true,
+            qid: "curated:silo-season-3-cast:rebecca-ferguson",
+            name: "Rebecca Ferguson",
+          }
+        }
+
+        return {
+          valid: false,
+          qid: "",
+          name: query,
+        }
+      },
+      invalidEntityMessage: "That answer is not in today's cast list.",
+      successMessage: "Correct cast member added.",
+    }
+  )
+
+  assert.equal(result.valid, true)
+  assert.equal(result.score, 1)
+  assert.equal(searchCalls, 0)
+  assert.equal(entityCalls, 0)
+})

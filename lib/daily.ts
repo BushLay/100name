@@ -1,6 +1,7 @@
 import type { GuessRuleValidator } from "./game.ts"
 import {
   SILO_SEASON_3_CAST_LIBRARY,
+  buildCuratedPersonQueryValidator,
   buildCuratedPersonValidator,
 } from "./curated-answer-libraries.ts"
 import {
@@ -36,6 +37,7 @@ type DailyThemeDefinition = {
   successMessage: string
   faq: DailyFaqItem[]
   validator: GuessRuleValidator
+  queryValidator?: (query: string) => { valid: boolean; qid: string; name: string }
 }
 
 export type DailyChallenge = {
@@ -217,6 +219,7 @@ const DAILY_THEMES: DailyThemeDefinition[] = [
       },
     ],
     validator: buildCuratedPersonValidator(SILO_SEASON_3_CAST_LIBRARY),
+    queryValidator: buildCuratedPersonQueryValidator(SILO_SEASON_3_CAST_LIBRARY),
   },
 ]
 
@@ -280,6 +283,10 @@ export function getDailyThemeMessages(themeId: DailyThemeId) {
     invalidEntityMessage: theme.invalidEntityMessage,
     successMessage: theme.successMessage,
   }
+}
+
+export function getDailyThemeQueryValidator(themeId: DailyThemeId) {
+  return getDailyThemeDefinition(themeId).queryValidator
 }
 
 export function getDailyChallenge(date: string): DailyChallenge {

@@ -33,6 +33,7 @@ import {
   type DailyThemeId,
   getDailyChallenge,
   getDailyThemeMessages,
+  getDailyThemeQueryValidator,
   getDailyThemeValidator,
   isValidChallengeDate,
 } from "@/lib/daily"
@@ -1357,6 +1358,7 @@ export async function submitGuess(input: {
     let attempt = await getOrCreateAttempt(client, context.player.id, context.sessionId, input.date)
     const acceptedGuesses = await getAcceptedGuesses(client, attempt.id)
     const themeValidator = getDailyThemeValidator(attempt.themeId as never)
+    const themeQueryValidator = getDailyThemeQueryValidator(attempt.themeId as never)
     const themeMessages = getDailyThemeMessages(attempt.themeId as never)
     const guessStartedAt = Date.now()
     const result = await validateGuessWithRules(
@@ -1367,6 +1369,7 @@ export async function submitGuess(input: {
       {
         targetScore: attempt.targetScore,
         validateEntity: themeValidator,
+        validateQuery: themeQueryValidator,
         invalidEntityMessage: themeMessages.invalidEntityMessage,
         successMessage: themeMessages.successMessage,
       }

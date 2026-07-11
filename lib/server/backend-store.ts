@@ -35,6 +35,7 @@ import {
   buildDailyShareText,
   getDailyChallenge,
   getDailyThemeMessages,
+  getDailyThemeQueryValidator,
   getDailyThemeValidator,
   isValidChallengeDate,
 } from "@/lib/daily"
@@ -1398,6 +1399,7 @@ export async function submitGuess(input: {
     assertPlayerNotRestricted(state, context.player.id)
     const attempt = getOrCreateAttempt(state, context.player.id, context.session.id, input.date)
     const themeValidator = getDailyThemeValidator(attempt.theme.themeId)
+    const themeQueryValidator = getDailyThemeQueryValidator(attempt.theme.themeId)
     const themeMessages = getDailyThemeMessages(attempt.theme.themeId)
     const guessStartedAt = Date.now()
 
@@ -1413,6 +1415,7 @@ export async function submitGuess(input: {
       {
         targetScore: attempt.theme.targetScore,
         validateEntity: themeValidator,
+        validateQuery: themeQueryValidator,
         invalidEntityMessage: themeMessages.invalidEntityMessage,
         successMessage: themeMessages.successMessage,
       }

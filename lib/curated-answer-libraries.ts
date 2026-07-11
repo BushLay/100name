@@ -1,4 +1,9 @@
-import type { GuessCandidate, GuessRuleValidator, WikidataEntity } from "@/lib/game"
+import type {
+  GuessCandidate,
+  GuessQueryValidator,
+  GuessRuleValidator,
+  WikidataEntity,
+} from "@/lib/game"
 
 export type CuratedAnswerEntry = {
   canonicalName: string
@@ -128,6 +133,29 @@ export function buildCuratedPersonValidator(
       valid: Boolean(match),
       qid: entity.id,
       name: match?.canonicalName ?? entity.labels?.en?.value ?? entity.id,
+    }
+  }
+}
+
+export function buildCuratedPersonQueryValidator(
+  library: CuratedAnswerLibrary
+): GuessQueryValidator {
+  const acceptedEntries = library.entries.map((entry) => ({
+    ...entry,
+    normalizedAcceptedNames: entry.acceptedNames.map(normalizeAnswerName),
+    qid: `curated:${library.id}:${normalizeAnswerName(entry.canonicalName).replace(/\s+/g, "-")}`,
+  }))
+
+  return (query: string): GuessCandidate => {
+    const normalizedQuery = normalizeAnswerName(query)
+    const match = acceptedEntries.find((entry) =>
+      entry.normalizedAcceptedNames.includes(normalizedQuery)
+    )
+
+    return {
+      valid: Boolean(match),
+      qid: match?.qid ?? "",
+      name: match?.canonicalName ?? query.trim(),
     }
   }
 }

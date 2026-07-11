@@ -37,10 +37,12 @@ type ValidationDependencies = {
 }
 
 type GuessRuleValidator = (entity: WikidataEntity | null) => GuessCandidate
+type GuessQueryValidator = (query: string) => GuessCandidate
 
 type GuessValidationOptions = {
   targetScore?: number
   validateEntity?: GuessRuleValidator
+  validateQuery?: GuessQueryValidator
   invalidEntityMessage?: string
   successMessage?: string
 }
@@ -71,6 +73,7 @@ export async function validateGuessWithRules(
   {
     targetScore = WINNING_SCORE,
     validateEntity = dependencies.validateFemaleHuman,
+    validateQuery,
     invalidEntityMessage = "That entry must be a female human with a Wikipedia page.",
     successMessage = "Correct guess added to your list.",
   }: GuessValidationOptions = {}
@@ -86,6 +89,43 @@ export async function validateGuessWithRules(
       score,
       won: hasWon(score),
       message: "Please enter a full name.",
+    }
+  }
+
+  if (validateQuery) {
+    const validated = validateQuery(query)
+
+    if (!validated.valid) {
+      return {
+        valid: false,
+        qid: validated.qid,
+        name: validated.name || query,
+        score,
+        won: hasWon(score),
+        message: invalidEntityMessage,
+      }
+    }
+
+    if (checkDuplicate(validated.qid, guessedQIDs)) {
+      return {
+        valid: false,
+        qid: validated.qid,
+        name: validated.name,
+        score,
+        won: hasWon(score),
+        message: "That person has already been guessed.",
+      }
+    }
+
+    const nextScore = updateScore(score)
+
+    return {
+      valid: true,
+      qid: validated.qid,
+      name: validated.name,
+      score: nextScore,
+      won: hasWon(nextScore),
+      message: successMessage,
     }
   }
 
@@ -148,4 +188,11 @@ export async function validateGuess(
   return validateGuessWithRules(name, guessedQIDs, score, dependencies)
 }
 
-export type { GuessCandidate, GuessRuleValidator, GuessValidationOptions, ValidationDependencies, WikidataEntity }
+export type {
+  GuessCandidate,
+  GuessRuleValidator,
+  GuessQueryValidator,
+  GuessValidationOptions,
+  ValidationDependencies,
+  WikidataEntity,
+}
