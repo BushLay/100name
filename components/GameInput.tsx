@@ -13,6 +13,10 @@ type GameInputProps = {
   title?: string
   description?: string
   buttonLabel?: string
+  feedback?: {
+    tone: "success" | "error" | "warning"
+    text: string
+  } | null
 }
 
 export function GameInput({
@@ -22,6 +26,7 @@ export function GameInput({
   title = "Drop Your Next Name",
   description = "Chain together valid women from Wikidata, avoid repeats, and keep your run alive until you hit 100.",
   buttonLabel = "Lock In",
+  feedback = null,
 }: GameInputProps) {
   const [value, setValue] = useState("")
 
@@ -37,6 +42,24 @@ export function GameInput({
     await onSubmit(trimmed)
     setValue("")
   }
+
+  const feedbackPanelClassName =
+    feedback?.tone === "success"
+      ? "border-emerald-300/40 bg-emerald-400/12 text-emerald-50"
+      : feedback?.tone === "warning"
+        ? "border-amber-300/40 bg-amber-300/12 text-amber-50"
+        : feedback?.tone === "error"
+          ? "border-rose-300/40 bg-rose-400/12 text-rose-50"
+          : "border-white/12 bg-white/8 text-cyan-50/88"
+
+  const feedbackBadgeLabel =
+    feedback?.tone === "success"
+      ? "Correct"
+      : feedback?.tone === "warning"
+        ? "Duplicate"
+        : feedback?.tone === "error"
+          ? "Incorrect"
+          : "Status"
 
   return (
     <Card className="overflow-hidden border-sky-200/80 bg-[linear-gradient(135deg,rgba(6,23,49,0.98),rgba(17,58,92,0.96)_45%,rgba(8,26,59,0.98)_100%)] text-white shadow-[0_36px_120px_rgba(14,165,233,0.28)] ring-1 ring-cyan-200/40 dark:border-sky-400/20 dark:ring-sky-300/10">
@@ -99,6 +122,21 @@ export function GameInput({
                 >
                   {loading ? "Checking..." : buttonLabel}
                 </Button>
+              </div>
+              <div
+                className={`rounded-[1.4rem] border px-4 py-3 shadow-[0_14px_40px_rgba(2,12,27,0.2)] transition ${feedbackPanelClassName}`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs font-semibold uppercase tracking-[0.24em]">
+                    {feedbackBadgeLabel}
+                  </span>
+                  <span className="text-xs uppercase tracking-[0.24em] text-white/70">
+                    {loading ? "Waiting" : "Latest Result"}
+                  </span>
+                </div>
+                <p className="mt-2 text-sm leading-6">
+                  {feedback?.text ?? "Submit a name to get an instant hit-or-miss result here."}
+                </p>
               </div>
               <p className="text-sm leading-6 text-sky-50/70">
                 One full name per turn. Valid hits are locked into your run instantly.

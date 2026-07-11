@@ -29,7 +29,7 @@ import { Separator } from "@/components/ui/separator"
 import { formatDuration, getDailyRoute, type DailyChallenge } from "@/lib/daily"
 
 type Feedback = {
-  tone: "success" | "error"
+  tone: "success" | "error" | "warning"
   text: string
 } | null
 
@@ -218,6 +218,18 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
     return () => window.clearTimeout(timeout)
   }, [shareBounce])
 
+  function getFeedbackTone(accepted: boolean, message: string): NonNullable<Feedback>["tone"] {
+    if (accepted) {
+      return "success"
+    }
+
+    if (message.match(/already been guessed/i)) {
+      return "warning"
+    }
+
+    return "error"
+  }
+
   async function handleSubmit(name: string) {
     setLoading(true)
     setCopied(false)
@@ -248,11 +260,12 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
           name,
           accepted: result.accepted,
           message: result.message,
+          tone: getFeedbackTone(result.accepted, result.message),
         },
         ...current,
       ].slice(0, 8))
       setFeedback({
-        tone: result.accepted ? "success" : "error",
+        tone: getFeedbackTone(result.accepted, result.message),
         text: result.message,
       })
       setDailyState(result.state)
@@ -319,6 +332,7 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
           buttonLabel={challenge.promptLabel}
           description={`Today's rule: every answer must match the ${challenge.categoryLabel.toLowerCase()} theme and pass Wikidata validation for ${challenge.date}.`}
           disabled={isCompleted || initializing}
+          feedback={feedback}
           loading={loading || initializing}
           onSubmit={handleSubmit}
           title={challenge.title}
@@ -414,13 +428,36 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
             className={
               feedback.tone === "success"
                 ? "border-emerald-200 bg-emerald-50/90 dark:border-emerald-900 dark:bg-emerald-950/30"
-                : "border-red-200 bg-red-50/90 dark:border-red-900 dark:bg-red-950/30"
+                : feedback.tone === "warning"
+                  ? "border-amber-200 bg-amber-50/90 dark:border-amber-900 dark:bg-amber-950/30"
+                  : "border-red-200 bg-red-50/90 dark:border-red-900 dark:bg-red-950/30"
             }
           >
             <CardContent className="flex items-center justify-between gap-4 p-4">
-              <p className="text-sm font-medium">{feedback.text}</p>
-              <Badge variant={feedback.tone === "success" ? "success" : "destructive"}>
-                {feedback.tone === "success" ? "Accepted" : "Rejected"}
+              <div className="space-y-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                  {feedback.tone === "success"
+                    ? "Correct Answer"
+                    : feedback.tone === "warning"
+                      ? "Already Used"
+                      : "Incorrect Answer"}
+                </p>
+                <p className="text-sm font-medium">{feedback.text}</p>
+              </div>
+              <Badge
+                variant={
+                  feedback.tone === "success"
+                    ? "success"
+                    : feedback.tone === "warning"
+                      ? "outline"
+                      : "destructive"
+                }
+              >
+                {feedback.tone === "success"
+                  ? "Correct"
+                  : feedback.tone === "warning"
+                    ? "Duplicate"
+                    : "Wrong"}
               </Badge>
             </CardContent>
           </Card>
