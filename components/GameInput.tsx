@@ -18,7 +18,7 @@ type SubmissionEntry = {
 type GameInputProps = {
   disabled?: boolean
   loading?: boolean
-  onSubmit: (name: string) => Promise<void> | void
+  onSubmit: (name: string) => Promise<boolean> | boolean
   title?: string
   description?: string
   feedback?: {
@@ -28,6 +28,8 @@ type GameInputProps = {
   score: number
   targetScore: number
   submissions: SubmissionEntry[]
+  boardSlotCount?: number
+  boardColumns?: 2 | 4
 }
 
 function getSubmissionTone(entry: SubmissionEntry) {
@@ -48,13 +50,22 @@ export function GameInput({
   score,
   targetScore,
   submissions,
+  boardSlotCount,
+  boardColumns = 2,
 }: GameInputProps) {
   const [draftValue, setDraftValue] = useState("")
   const activeInputRef = useRef<HTMLInputElement | null>(null)
 
   const activeSlotIndex = submissions.length
-  const visibleSlotCount = Math.max(Math.min(targetScore, 20), activeSlotIndex + 1)
+  const visibleSlotCount = Math.max(
+    boardSlotCount ?? Math.min(targetScore, 20),
+    activeSlotIndex + 1
+  )
   const progress = Math.min((score / targetScore) * 100, 100)
+  const gridClassName =
+    boardColumns === 4
+      ? "grid gap-x-4 gap-y-4 sm:grid-cols-2 xl:grid-cols-4"
+      : "grid gap-x-6 gap-y-4 md:grid-cols-2"
 
   useEffect(() => {
     if (disabled || loading) {
@@ -84,8 +95,14 @@ export function GameInput({
     event.preventDefault()
 
     const trimmed = draftValue.trim()
-    await onSubmit(trimmed)
-    setDraftValue("")
+    const accepted = await onSubmit(trimmed)
+
+    if (accepted) {
+      setDraftValue("")
+      return
+    }
+
+    setDraftValue(trimmed)
   }
 
   return (
@@ -157,10 +174,11 @@ export function GameInput({
 
       <CardContent className="p-5 sm:p-6">
         <form onSubmit={handleSubmit}>
-          <div className="grid gap-x-6 gap-y-4 md:grid-cols-2">
+          <div className={gridClassName}>
             {Array.from({ length: visibleSlotCount }, (_, index) => {
               const submittedEntry = submissions[index]
               const isActiveSlot = !submittedEntry && index === activeSlotIndex && !disabled
+              const activeTone = isActiveSlot && feedback && draftValue.trim() ? feedback.tone : null
               const tone = submittedEntry ? getSubmissionTone(submittedEntry) : null
               const slotClassName =
                 tone === "success"
@@ -169,9 +187,15 @@ export function GameInput({
                     ? "border-amber-300 bg-amber-50 text-amber-950 shadow-[0_0_0_2px_rgba(251,191,36,0.18)]"
                     : tone === "error"
                       ? "border-rose-300 bg-rose-50 text-rose-950 shadow-[0_0_0_2px_rgba(251,113,133,0.18)]"
-                      : isActiveSlot
-                        ? "border-[#f4c4a7] bg-white text-slate-900 shadow-[0_0_0_2px_rgba(244,196,167,0.22)]"
-                        : "border-[#c89cae] bg-white/92 text-slate-500"
+                      : activeTone === "success"
+                        ? "border-emerald-300 bg-white text-slate-900 shadow-[0_0_0_2px_rgba(74,222,128,0.18)]"
+                        : activeTone === "warning"
+                          ? "border-amber-300 bg-white text-slate-900 shadow-[0_0_0_2px_rgba(251,191,36,0.18)]"
+                          : activeTone === "error"
+                            ? "border-rose-300 bg-white text-slate-900 shadow-[0_0_0_2px_rgba(251,113,133,0.18)]"
+                        : isActiveSlot
+                          ? "border-[#f4c4a7] bg-white text-slate-900 shadow-[0_0_0_2px_rgba(244,196,167,0.22)]"
+                          : "border-[#c89cae] bg-white/92 text-slate-500"
 
               return (
                 <div className="flex items-start gap-3" key={submittedEntry?.id ?? `slot-${index}`}>
@@ -205,7 +229,7 @@ export function GameInput({
                         />
                         <p className="pl-1 text-xs text-[#d8b6a1]/78">
                           Press <span className="font-semibold text-[#ffd3b4]">Enter</span> to
-                          validate this name and unlock the next slot.
+                          validate this name. The next slot unlocks only after a correct answer.
                         </p>
                       </>
                     ) : submittedEntry ? (

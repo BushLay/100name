@@ -274,21 +274,24 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
         throw new Error(result.message ?? "Failed to submit guess.")
       }
 
-      setSubmissionHistory((current) => [
-        ...current,
-        {
-          id: "guess" in result && result.guess?.id ? result.guess.id : crypto.randomUUID(),
-          name,
-          accepted: result.accepted,
-          message: result.message,
-          tone: getFeedbackTone(result.accepted, result.message),
-        },
-      ])
+      if (result.accepted) {
+        setSubmissionHistory((current) => [
+          ...current,
+          {
+            id: "guess" in result && result.guess?.id ? result.guess.id : crypto.randomUUID(),
+            name,
+            accepted: true,
+            message: result.message,
+            tone: getFeedbackTone(result.accepted, result.message),
+          },
+        ])
+      }
       setFeedback({
         tone: getFeedbackTone(result.accepted, result.message),
         text: result.message,
       })
       setDailyState(result.state)
+      return result.accepted
     } catch (error) {
       setFeedback({
         tone: "error",
@@ -297,6 +300,7 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
             ? error.message
             : "The server could not verify this guess right now. Please try again.",
       })
+      return false
     } finally {
       setLoading(false)
     }

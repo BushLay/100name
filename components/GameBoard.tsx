@@ -153,21 +153,24 @@ function GameBoardClient() {
         throw new Error(result.message ?? "Failed to submit open-mode guess.")
       }
 
-      setSubmissionHistory((current) => [
-        ...current,
-        {
-          id: crypto.randomUUID(),
-          name,
-          accepted: result.accepted,
-          message: result.message,
-          tone: getFeedbackTone(result.accepted, result.message),
-        },
-      ])
+      if (result.accepted) {
+        setSubmissionHistory((current) => [
+          ...current,
+          {
+            id: crypto.randomUUID(),
+            name,
+            accepted: true,
+            message: result.message,
+            tone: getFeedbackTone(result.accepted, result.message),
+          },
+        ])
+      }
       setFeedback({
         tone: getFeedbackTone(result.accepted, result.message),
         text: result.message,
       })
       setGameState(result.state)
+      return result.accepted
     } catch (error) {
       setFeedback({
         tone: "error",
@@ -176,6 +179,7 @@ function GameBoardClient() {
             ? error.message
             : "Wikidata is unavailable right now. Please try again.",
       })
+      return false
     } finally {
       setLoading(false)
     }
@@ -190,6 +194,8 @@ function GameBoardClient() {
         feedback={feedback}
         loading={loading || initializing}
         onSubmit={handleSubmit}
+        boardColumns={4}
+        boardSlotCount={20}
         score={gameState.score}
         submissions={submissionHistory}
         targetScore={gameState.targetScore}
