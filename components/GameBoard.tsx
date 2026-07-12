@@ -195,7 +195,7 @@ function GameBoardClient() {
         loading={loading || initializing}
         onSubmit={handleSubmit}
         boardColumns={4}
-        boardSlotCount={20}
+        boardSlotCount={100}
         score={gameState.score}
         submissions={submissionHistory}
         targetScore={gameState.targetScore}

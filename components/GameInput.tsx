@@ -250,11 +250,11 @@ export function GameInput({
                             {disabled ? "Locked" : `Waiting for slot ${index + 1}`}
                           </span>
                         </div>
-                        <p className="pl-1 text-xs text-[#d8b6a1]/55">
-                          {disabled
-                            ? "The board is currently locked."
-                            : "This slot will activate after the previous submission."}
-                        </p>
+                        {disabled ? (
+                          <p className="pl-1 text-xs text-[#d8b6a1]/55">
+                            The board is currently locked.
+                          </p>
+                        ) : null}
                       </>
                     )}
                   </div>
