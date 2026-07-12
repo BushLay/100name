@@ -11,7 +11,6 @@ import type {
 } from "@/lib/backend-contracts"
 import { GameInput } from "@/components/GameInput"
 import { GuessList } from "@/components/GuessList"
-import { RecentGuessHistory, type RecentGuessHistoryItem } from "@/components/RecentGuessHistory"
 import { ScoreBoard } from "@/components/ScoreBoard"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -151,7 +150,15 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
   const [copied, setCopied] = useState(false)
   const [shareBounce, setShareBounce] = useState(false)
   const [showResultDialog, setShowResultDialog] = useState(false)
-  const [recentGuesses, setRecentGuesses] = useState<RecentGuessHistoryItem[]>([])
+  const [submissionHistory, setSubmissionHistory] = useState<
+    Array<{
+      id: string
+      name: string
+      accepted: boolean
+      message: string
+      tone?: "success" | "error" | "warning"
+    }>
+  >([])
   const lastCompletedState = useRef(false)
 
   const currentAttempt = dailyState.attempt
@@ -176,6 +183,15 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
 
         setDailyState(response.state)
         setOverview(response.overview)
+        setSubmissionHistory(
+          response.state.acceptedGuesses.map((guess, index) => ({
+            id: `accepted-${guess.qid}-${index}`,
+            name: guess.name,
+            accepted: true,
+            message: "Previously accepted on this challenge.",
+            tone: "success" as const,
+          }))
+        )
       } catch {
         if (cancelled) {
           return
@@ -254,7 +270,8 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
         throw new Error(result.message ?? "Failed to submit guess.")
       }
 
-      setRecentGuesses((current) => [
+      setSubmissionHistory((current) => [
+        ...current,
         {
           id: "guess" in result && result.guess?.id ? result.guess.id : crypto.randomUUID(),
           name,
@@ -262,17 +279,19 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
           message: result.message,
           tone: getFeedbackTone(result.accepted, result.message),
         },
-        ...current,
-      ].slice(0, 8))
+      ])
       setFeedback({
         tone: getFeedbackTone(result.accepted, result.message),
         text: result.message,
       })
       setDailyState(result.state)
-    } catch {
+    } catch (error) {
       setFeedback({
         tone: "error",
-        text: "The server could not verify this guess right now. Please try again.",
+        text:
+          error instanceof Error && error.message.trim()
+            ? error.message
+            : "The server could not verify this guess right now. Please try again.",
       })
     } finally {
       setLoading(false)
@@ -329,12 +348,14 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
     <>
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
         <GameInput
-          buttonLabel={challenge.promptLabel}
           description={`Today's rule: every answer must match the ${challenge.categoryLabel.toLowerCase()} theme and pass Wikidata validation for ${challenge.date}.`}
           disabled={isCompleted || initializing}
           feedback={feedback}
           loading={loading || initializing}
           onSubmit={handleSubmit}
+          score={currentAttempt.score}
+          submissions={submissionHistory}
+          targetScore={challenge.targetScore}
           title={challenge.title}
         />
 
@@ -421,47 +442,6 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
         </section>
 
         <GuessList guesses={dailyState.acceptedGuesses} />
-        <RecentGuessHistory items={recentGuesses} />
-
-        {feedback ? (
-          <Card
-            className={
-              feedback.tone === "success"
-                ? "border-emerald-200 bg-emerald-50/90 dark:border-emerald-900 dark:bg-emerald-950/30"
-                : feedback.tone === "warning"
-                  ? "border-amber-200 bg-amber-50/90 dark:border-amber-900 dark:bg-amber-950/30"
-                  : "border-red-200 bg-red-50/90 dark:border-red-900 dark:bg-red-950/30"
-            }
-          >
-            <CardContent className="flex items-center justify-between gap-4 p-4">
-              <div className="space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-                  {feedback.tone === "success"
-                    ? "Correct Answer"
-                    : feedback.tone === "warning"
-                      ? "Already Used"
-                      : "Incorrect Answer"}
-                </p>
-                <p className="text-sm font-medium">{feedback.text}</p>
-              </div>
-              <Badge
-                variant={
-                  feedback.tone === "success"
-                    ? "success"
-                    : feedback.tone === "warning"
-                      ? "outline"
-                      : "destructive"
-                }
-              >
-                {feedback.tone === "success"
-                  ? "Correct"
-                  : feedback.tone === "warning"
-                    ? "Duplicate"
-                    : "Wrong"}
-              </Badge>
-            </CardContent>
-          </Card>
-        ) : null}
 
         {isCompleted ? (
           <Card className="border-amber-200 bg-amber-50/90 dark:border-amber-900 dark:bg-amber-950/30">

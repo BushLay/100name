@@ -6,7 +6,6 @@ import { useEffect, useState, useSyncExternalStore } from "react"
 import type { OpenGameState, SubmitOpenGuessResponse } from "@/lib/backend-contracts"
 import { GameInput } from "@/components/GameInput"
 import { GuessList } from "@/components/GuessList"
-import { RecentGuessHistory, type RecentGuessHistoryItem } from "@/components/RecentGuessHistory"
 import { ScoreBoard } from "@/components/ScoreBoard"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -56,7 +55,15 @@ function GameBoardClient() {
   const [loading, setLoading] = useState(false)
   const [initializing, setInitializing] = useState(true)
   const [feedback, setFeedback] = useState<Feedback>(null)
-  const [recentGuesses, setRecentGuesses] = useState<RecentGuessHistoryItem[]>([])
+  const [submissionHistory, setSubmissionHistory] = useState<
+    Array<{
+      id: string
+      name: string
+      accepted: boolean
+      message: string
+      tone?: "success" | "error" | "warning"
+    }>
+  >([])
 
   useEffect(() => {
     let cancelled = false
@@ -77,6 +84,15 @@ function GameBoardClient() {
 
         if (!cancelled) {
           setGameState(payload.state)
+          setSubmissionHistory(
+            payload.state.acceptedGuesses.map((guess, index) => ({
+              id: `accepted-${guess.qid}-${index}`,
+              name: guess.name,
+              accepted: true,
+              message: "Previously accepted in this run.",
+              tone: "success" as const,
+            }))
+          )
         }
       } catch {
         if (!cancelled) {
@@ -130,7 +146,8 @@ function GameBoardClient() {
         throw new Error(result.message ?? "Failed to submit open-mode guess.")
       }
 
-      setRecentGuesses((current) => [
+      setSubmissionHistory((current) => [
+        ...current,
         {
           id: crypto.randomUUID(),
           name,
@@ -138,17 +155,19 @@ function GameBoardClient() {
           message: result.message,
           tone: getFeedbackTone(result.accepted, result.message),
         },
-        ...current,
-      ].slice(0, 8))
+      ])
       setFeedback({
         tone: getFeedbackTone(result.accepted, result.message),
         text: result.message,
       })
       setGameState(result.state)
-    } catch {
+    } catch (error) {
       setFeedback({
         tone: "error",
-        text: "Wikidata is unavailable right now. Please try again.",
+        text:
+          error instanceof Error && error.message.trim()
+            ? error.message
+            : "Wikidata is unavailable right now. Please try again.",
       })
     } finally {
       setLoading(false)
@@ -164,6 +183,9 @@ function GameBoardClient() {
         feedback={feedback}
         loading={loading || initializing}
         onSubmit={handleSubmit}
+        score={gameState.score}
+        submissions={submissionHistory}
+        targetScore={gameState.targetScore}
       />
 
       <section className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
@@ -218,47 +240,6 @@ function GameBoardClient() {
       </section>
 
       <GuessList guesses={gameState.acceptedGuesses} />
-      <RecentGuessHistory items={recentGuesses} />
-
-      {feedback ? (
-        <Card
-          className={
-            feedback.tone === "success"
-              ? "border-emerald-300 bg-[linear-gradient(135deg,rgba(236,253,245,0.98),rgba(209,250,229,0.92))] dark:border-emerald-800 dark:bg-emerald-950/30"
-              : feedback.tone === "warning"
-                ? "border-amber-300 bg-[linear-gradient(135deg,rgba(255,251,235,0.98),rgba(253,230,138,0.45))] dark:border-amber-800 dark:bg-amber-950/30"
-                : "border-red-300 bg-[linear-gradient(135deg,rgba(254,242,242,0.98),rgba(254,226,226,0.92))] dark:border-red-900 dark:bg-red-950/30"
-          }
-        >
-          <CardContent className="flex items-center justify-between gap-4 p-4">
-            <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-                {feedback.tone === "success"
-                  ? "Correct Answer"
-                  : feedback.tone === "warning"
-                    ? "Already Used"
-                    : "Incorrect Answer"}
-              </p>
-              <p className="text-sm font-medium">{feedback.text}</p>
-            </div>
-            <Badge
-              variant={
-                feedback.tone === "success"
-                  ? "success"
-                  : feedback.tone === "warning"
-                    ? "outline"
-                    : "destructive"
-              }
-            >
-              {feedback.tone === "success"
-                ? "Correct"
-                : feedback.tone === "warning"
-                  ? "Duplicate"
-                  : "Wrong"}
-            </Badge>
-          </CardContent>
-        </Card>
-      ) : null}
 
       {won ? (
         <Card className="border-amber-300 bg-[linear-gradient(135deg,rgba(255,251,235,0.98),rgba(254,240,138,0.35))] dark:border-amber-900 dark:bg-amber-950/30">

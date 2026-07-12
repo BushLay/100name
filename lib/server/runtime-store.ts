@@ -6,18 +6,13 @@ import type { RuntimeStore } from "@/lib/server/store-types"
 
 const SESSION_COOKIE_NAME = "name100_session"
 
-const dynamicImport = new Function(
-  "modulePath",
-  "return import(modulePath)"
-) as <TModule>(modulePath: string) => Promise<TModule>
-
 let developmentStorePromise: Promise<RuntimeStore> | null = null
 
 async function loadDevelopmentStore(): Promise<RuntimeStore> {
   if (!developmentStorePromise) {
-    developmentStorePromise = dynamicImport<typeof import("@/lib/server/backend-store")>(
-      "@/lib/server/backend-store"
-    ) as Promise<RuntimeStore>
+    developmentStorePromise = import("./backend-store").then(
+      (module) => module as RuntimeStore
+    )
   }
 
   return developmentStorePromise

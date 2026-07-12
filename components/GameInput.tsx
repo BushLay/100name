@@ -1,10 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import { Check, CircleX, CornerDownLeft, Loader2 } from "lucide-react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
-import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+
+type SubmissionEntry = {
+  id: string
+  name: string
+  accepted: boolean
+  message: string
+  tone?: "success" | "error" | "warning"
+}
 
 type GameInputProps = {
   disabled?: boolean
@@ -12,138 +21,231 @@ type GameInputProps = {
   onSubmit: (name: string) => Promise<void> | void
   title?: string
   description?: string
-  buttonLabel?: string
   feedback?: {
     tone: "success" | "error" | "warning"
     text: string
   } | null
+  score: number
+  targetScore: number
+  submissions: SubmissionEntry[]
+}
+
+function getSubmissionTone(entry: SubmissionEntry) {
+  if (entry.tone) {
+    return entry.tone
+  }
+
+  return entry.accepted ? "success" : "error"
 }
 
 export function GameInput({
   disabled = false,
   loading = false,
   onSubmit,
-  title = "Drop Your Next Name",
-  description = "Chain together valid women from Wikidata, avoid repeats, and keep your run alive until you hit 100.",
-  buttonLabel = "Lock In",
+  title = "Name 100",
+  description = "Fill the board one name at a time. Press Enter to validate the current slot and move to the next one.",
   feedback = null,
+  score,
+  targetScore,
+  submissions,
 }: GameInputProps) {
-  const [value, setValue] = useState("")
+  const [draftValue, setDraftValue] = useState("")
+  const activeInputRef = useRef<HTMLInputElement | null>(null)
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const trimmed = value.trim()
+  const activeSlotIndex = submissions.length
+  const visibleSlotCount = Math.max(Math.min(targetScore, 20), activeSlotIndex + 1)
+  const progress = Math.min((score / targetScore) * 100, 100)
 
-    if (!trimmed) {
-      await onSubmit("")
+  useEffect(() => {
+    if (disabled || loading) {
       return
     }
 
+    activeInputRef.current?.focus()
+  }, [activeSlotIndex, disabled, loading])
+
+  const latestStatusLabel = useMemo(() => {
+    if (!feedback) {
+      return "Waiting"
+    }
+
+    if (feedback.tone === "success") {
+      return "Correct"
+    }
+
+    if (feedback.tone === "warning") {
+      return "Duplicate"
+    }
+
+    return "Incorrect"
+  }, [feedback])
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    const trimmed = draftValue.trim()
     await onSubmit(trimmed)
-    setValue("")
+    setDraftValue("")
   }
 
-  const feedbackPanelClassName =
-    feedback?.tone === "success"
-      ? "border-emerald-300/40 bg-emerald-400/12 text-emerald-50"
-      : feedback?.tone === "warning"
-        ? "border-amber-300/40 bg-amber-300/12 text-amber-50"
-        : feedback?.tone === "error"
-          ? "border-rose-300/40 bg-rose-400/12 text-rose-50"
-          : "border-white/12 bg-white/8 text-cyan-50/88"
-
-  const feedbackBadgeLabel =
-    feedback?.tone === "success"
-      ? "Correct"
-      : feedback?.tone === "warning"
-        ? "Duplicate"
-        : feedback?.tone === "error"
-          ? "Incorrect"
-          : "Status"
-
   return (
-    <Card className="overflow-hidden border-sky-200/80 bg-[linear-gradient(135deg,rgba(6,23,49,0.98),rgba(17,58,92,0.96)_45%,rgba(8,26,59,0.98)_100%)] text-white shadow-[0_36px_120px_rgba(14,165,233,0.28)] ring-1 ring-cyan-200/40 dark:border-sky-400/20 dark:ring-sky-300/10">
-      <CardContent className="p-0">
-        <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
-          <div className="relative overflow-hidden px-6 py-7 sm:px-8 sm:py-9">
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-200/80 to-transparent" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.28),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(250,204,21,0.16),transparent_24%)]" />
-            <div className="absolute inset-y-0 right-0 w-px bg-white/10" />
-            <div className="relative flex h-full flex-col justify-between gap-6">
-              <div className="space-y-4">
-                <div className="inline-flex w-fit items-center rounded-full border border-cyan-200/30 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100 shadow-sm">
-                  Live Run Console
-                </div>
-                <CardHeader className="space-y-3 p-0">
-                  <CardTitle className="max-w-lg text-3xl leading-tight sm:text-4xl lg:text-[2.8rem]">
-                    {title}
-                  </CardTitle>
-                  <CardDescription className="max-w-xl text-base leading-7 text-sky-50/78">
-                    {description}
-                  </CardDescription>
-                </CardHeader>
-              </div>
-              <div className="grid gap-2 text-sm text-cyan-50/88 sm:grid-cols-3">
-                <div className="rounded-2xl border border-white/12 bg-white/8 px-3 py-2 shadow-sm">
-                  Target: 100 names
-                </div>
-                <div className="rounded-2xl border border-white/12 bg-white/8 px-3 py-2 shadow-sm">
-                  Rule: no repeats
-                </div>
-                <div className="rounded-2xl border border-white/12 bg-white/8 px-3 py-2 shadow-sm">
-                  Judge: Wikidata
-                </div>
-              </div>
+    <Card className="overflow-hidden border-[rgba(255,200,174,0.34)] bg-[linear-gradient(180deg,#2a1634_0%,#351d45_45%,#291735_100%)] text-amber-50 shadow-[0_34px_120px_rgba(42,22,52,0.42)]">
+      <CardHeader className="gap-5 border-b border-white/8 bg-[radial-gradient(circle_at_top,rgba(255,194,152,0.12),transparent_36%)] pb-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="space-y-2">
+            <div className="flex flex-wrap gap-2">
+              <Badge className="border-white/10 bg-white/10 text-amber-50 hover:bg-white/10">
+                Answer Board
+              </Badge>
+              <Badge className="border-[#f0c3a7]/25 bg-[#f0c3a7]/10 text-[#ffd7b2] hover:bg-[#f0c3a7]/10">
+                Press Enter To Check
+              </Badge>
             </div>
+            <CardTitle className="text-3xl tracking-tight text-[#ffd3b4] sm:text-4xl">
+              {title}
+            </CardTitle>
+            <CardDescription className="max-w-3xl text-sm leading-7 text-[#f5d6c0]/78">
+              {description}
+            </CardDescription>
           </div>
-
-          <div className="border-t border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0.04))] px-6 py-7 sm:px-8 sm:py-9 lg:border-l lg:border-t-0">
-            <form className="flex h-full flex-col justify-center gap-4" onSubmit={handleSubmit}>
-              <div className="flex items-center justify-between text-xs uppercase tracking-[0.24em] text-cyan-100/70">
-                <span>Input Channel</span>
-                <span>{loading ? "Scanning" : "Ready"}</span>
-              </div>
-              <Input
-                autoComplete="off"
-                autoCorrect="off"
-                className="h-20 rounded-[1.6rem] border-cyan-100/20 bg-slate-950/70 px-6 text-2xl font-medium text-white shadow-[0_18px_60px_rgba(2,12,27,0.42)] placeholder:text-xl placeholder:text-sky-100/38"
-                disabled={disabled || loading}
-                onChange={(event) => setValue(event.target.value)}
-                placeholder="Ada Lovelace"
-                spellCheck={false}
-                value={value}
-              />
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Button
-                  className="h-16 flex-1 rounded-[1.4rem] border border-cyan-200/40 bg-[linear-gradient(135deg,#22d3ee,#0ea5e9_48%,#2563eb)] px-7 text-lg font-semibold text-slate-950 shadow-[0_16px_48px_rgba(14,165,233,0.34)]"
-                  disabled={disabled || loading}
-                  size="lg"
-                  type="submit"
-                >
-                  {loading ? "Checking..." : buttonLabel}
-                </Button>
-              </div>
-              <div
-                className={`rounded-[1.4rem] border px-4 py-3 shadow-[0_14px_40px_rgba(2,12,27,0.2)] transition ${feedbackPanelClassName}`}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs font-semibold uppercase tracking-[0.24em]">
-                    {feedbackBadgeLabel}
-                  </span>
-                  <span className="text-xs uppercase tracking-[0.24em] text-white/70">
-                    {loading ? "Waiting" : "Latest Result"}
-                  </span>
-                </div>
-                <p className="mt-2 text-sm leading-6">
-                  {feedback?.text ?? "Submit a name to get an instant hit-or-miss result here."}
-                </p>
-              </div>
-              <p className="text-sm leading-6 text-sky-50/70">
-                One full name per turn. Valid hits are locked into your run instantly.
-              </p>
-            </form>
+          <div className="min-w-[9rem] rounded-3xl border border-[#f0c3a7]/18 bg-white/6 px-5 py-4 text-right shadow-inner">
+            <p className="text-xs uppercase tracking-[0.28em] text-[#d8b6a1]/78">Progress</p>
+            <p className="mt-2 text-3xl font-black text-[#ffd3b4]">
+              {score}/{targetScore}
+            </p>
           </div>
         </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm font-medium text-[#f4d0ba]">
+            <span>{loading ? "Checking current slot..." : "Board status"}</span>
+            <span>{Math.round(progress)}%</span>
+          </div>
+          <div className="h-3 overflow-hidden rounded-full bg-white/8">
+            <div
+              aria-hidden="true"
+              className="h-full rounded-full bg-[linear-gradient(90deg,#f3c0aa_0%,#dc8dc0_55%,#8cf4b6_100%)] transition-[width] duration-500"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-white/8 bg-white/6 px-4 py-3">
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-[0.24em] text-[#d8b6a1]/78">
+              Latest Result
+            </p>
+            <p className="text-sm leading-6 text-[#ffe1cb]">
+              {feedback?.text ?? "Start typing in the next empty slot and press Enter to validate."}
+            </p>
+          </div>
+          <Badge
+            className={
+              feedback?.tone === "success"
+                ? "border-emerald-300/30 bg-emerald-400/15 text-emerald-100"
+                : feedback?.tone === "warning"
+                  ? "border-amber-300/30 bg-amber-300/14 text-amber-100"
+                  : feedback?.tone === "error"
+                    ? "border-rose-300/30 bg-rose-400/15 text-rose-100"
+                    : "border-white/10 bg-white/8 text-[#ffd3b4]"
+            }
+          >
+            {latestStatusLabel}
+          </Badge>
+        </div>
+      </CardHeader>
+
+      <CardContent className="p-5 sm:p-6">
+        <form onSubmit={handleSubmit}>
+          <div className="grid gap-x-6 gap-y-4 md:grid-cols-2">
+            {Array.from({ length: visibleSlotCount }, (_, index) => {
+              const submittedEntry = submissions[index]
+              const isActiveSlot = !submittedEntry && index === activeSlotIndex && !disabled
+              const tone = submittedEntry ? getSubmissionTone(submittedEntry) : null
+              const slotClassName =
+                tone === "success"
+                  ? "border-emerald-300 bg-emerald-50 text-emerald-950 shadow-[0_0_0_2px_rgba(74,222,128,0.2)]"
+                  : tone === "warning"
+                    ? "border-amber-300 bg-amber-50 text-amber-950 shadow-[0_0_0_2px_rgba(251,191,36,0.18)]"
+                    : tone === "error"
+                      ? "border-rose-300 bg-rose-50 text-rose-950 shadow-[0_0_0_2px_rgba(251,113,133,0.18)]"
+                      : isActiveSlot
+                        ? "border-[#f4c4a7] bg-white text-slate-900 shadow-[0_0_0_2px_rgba(244,196,167,0.22)]"
+                        : "border-[#c89cae] bg-white/92 text-slate-500"
+
+              return (
+                <div className="flex items-start gap-3" key={submittedEntry?.id ?? `slot-${index}`}>
+                  <div className="flex h-[3.35rem] w-7 items-center justify-center text-lg font-black text-[#ffd3b4]">
+                    {submittedEntry ? (
+                      tone === "success" ? (
+                        <Check className="h-5 w-5 text-emerald-300" />
+                      ) : tone === "warning" ? (
+                        <CornerDownLeft className="h-5 w-5 text-amber-300" />
+                      ) : (
+                        <CircleX className="h-5 w-5 text-rose-300" />
+                      )
+                    ) : (
+                      <span>{index + 1}.</span>
+                    )}
+                  </div>
+
+                  <div className="min-w-0 flex-1 space-y-1">
+                    {isActiveSlot ? (
+                      <>
+                        <Input
+                          autoComplete="off"
+                          autoCorrect="off"
+                          className={`h-[3.35rem] rounded-2xl border-2 px-4 text-base font-medium ${slotClassName}`}
+                          disabled={loading}
+                          onChange={(event) => setDraftValue(event.target.value)}
+                          placeholder={loading ? "Checking..." : `Answer ${index + 1}`}
+                          ref={activeInputRef}
+                          spellCheck={false}
+                          value={draftValue}
+                        />
+                        <p className="pl-1 text-xs text-[#d8b6a1]/78">
+                          Press <span className="font-semibold text-[#ffd3b4]">Enter</span> to
+                          validate this name and unlock the next slot.
+                        </p>
+                      </>
+                    ) : submittedEntry ? (
+                      <>
+                        <div
+                          className={`flex min-h-[3.35rem] items-center rounded-2xl border-2 px-4 text-base font-medium ${slotClassName}`}
+                        >
+                          <span className="truncate">{submittedEntry.name || "Empty submission"}</span>
+                        </div>
+                        <p className="pl-1 text-xs text-[#d8b6a1]/78">{submittedEntry.message}</p>
+                      </>
+                    ) : (
+                      <>
+                        <div
+                          className={`flex min-h-[3.35rem] items-center rounded-2xl border-2 px-4 text-base font-medium ${slotClassName}`}
+                        >
+                          <span className="opacity-65">
+                            {disabled ? "Locked" : `Waiting for slot ${index + 1}`}
+                          </span>
+                        </div>
+                        <p className="pl-1 text-xs text-[#d8b6a1]/55">
+                          {disabled
+                            ? "The board is currently locked."
+                            : "This slot will activate after the previous submission."}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </form>
+
+        {loading ? (
+          <div className="mt-5 flex items-center gap-3 rounded-3xl border border-white/8 bg-white/6 px-4 py-3 text-sm text-[#ffe1cb]">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Checking the current guess against the live game rules.</span>
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   )

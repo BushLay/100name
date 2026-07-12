@@ -1,5 +1,6 @@
 const WIKIDATA_API_URL = "https://www.wikidata.org/w/api.php"
 const ENTITY_DATA_BASE_URL = "https://www.wikidata.org/wiki/Special:EntityData"
+const WIKIDATA_FETCH_TIMEOUT_MS = 8_000
 
 const HUMAN_QID = "Q5"
 const FEMALE_QID = "Q6581072"
@@ -33,6 +34,13 @@ export type GuessCandidate = {
   name: string
 }
 
+export class WikidataServiceError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = "WikidataServiceError"
+  }
+}
+
 type WikidataSearchItem = {
   id?: string
   label?: string
@@ -61,6 +69,39 @@ type SearchResponse = {
 
 type EntityResponse = {
   entities?: Record<string, WikidataEntity>
+}
+
+function createWikidataTimeoutSignal() {
+  return AbortSignal.timeout(WIKIDATA_FETCH_TIMEOUT_MS)
+}
+
+function normalizeWikidataError(
+  error: unknown,
+  operation: "search" | "entity"
+): WikidataServiceError {
+  if (error instanceof WikidataServiceError) {
+    return error
+  }
+
+  if (error instanceof Error) {
+    if (error.name === "TimeoutError" || error.name === "AbortError") {
+      return new WikidataServiceError(
+        `Wikidata ${operation} request timed out after ${WIKIDATA_FETCH_TIMEOUT_MS}ms.`
+      )
+    }
+
+    if (error.message === "fetch failed") {
+      return new WikidataServiceError(
+        `Wikidata ${operation} request failed. Check local network, DNS, proxy, or firewall settings.`
+      )
+    }
+
+    return new WikidataServiceError(
+      `Wikidata ${operation} request failed: ${error.message}`
+    )
+  }
+
+  return new WikidataServiceError(`Wikidata ${operation} request failed.`)
 }
 
 export function getClaimIds(entity: WikidataEntity, property: string) {
@@ -115,10 +156,14 @@ export async function searchEntity(name: string): Promise<GuessCandidate> {
         type: "item",
       })
 
-      const response = await fetch(`${WIKIDATA_API_URL}?${params.toString()}`)
+      const response = await fetch(`${WIKIDATA_API_URL}?${params.toString()}`, {
+        signal: createWikidataTimeoutSignal(),
+      })
 
       if (!response.ok) {
-        throw new Error("Failed to search Wikidata")
+        throw new WikidataServiceError(
+          `Wikidata search request failed with status ${response.status}.`
+        )
       }
 
       const data = (await response.json()) as SearchResponse
@@ -139,7 +184,7 @@ export async function searchEntity(name: string): Promise<GuessCandidate> {
       }
     } catch (error) {
       searchCache.delete(cacheKey)
-      throw error
+      throw normalizeWikidataError(error, "search")
     }
   })()
 
@@ -158,11 +203,16 @@ export async function getEntityData(qid: string): Promise<WikidataEntity | null>
   const request = (async () => {
     try {
       const response = await fetch(
-        `${ENTITY_DATA_BASE_URL}/${qid}.json?origin=*`
+        `${ENTITY_DATA_BASE_URL}/${qid}.json?origin=*`,
+        {
+          signal: createWikidataTimeoutSignal(),
+        }
       )
 
       if (!response.ok) {
-        throw new Error("Failed to load Wikidata entity")
+        throw new WikidataServiceError(
+          `Wikidata entity request failed with status ${response.status}.`
+        )
       }
 
       const data = (await response.json()) as EntityResponse
@@ -170,7 +220,7 @@ export async function getEntityData(qid: string): Promise<WikidataEntity | null>
       return data.entities?.[qid] ?? null
     } catch (error) {
       entityCache.delete(qid)
-      throw error
+      throw normalizeWikidataError(error, "entity")
     }
   })()
 

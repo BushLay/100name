@@ -15,6 +15,7 @@ import {
 } from "@/lib/server/observability"
 import { applyRateLimit, buildRateLimitKey } from "@/lib/server/rate-limit"
 import { getSessionCookieName, submitOpenGuess } from "@/lib/server/runtime-store"
+import { WikidataServiceError } from "@/lib/wikidata"
 
 export const dynamic = "force-dynamic"
 
@@ -62,12 +63,13 @@ export async function POST(request: NextRequest) {
     return withRateLimitHeaders(nextResponse, rateLimit)
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to submit open-mode guess."
+    const status = error instanceof WikidataServiceError ? 503 : 400
 
     logRequestError(requestContext, "open.guess.failed", error)
 
     return createApiErrorResponse({
       message,
-      status: 400,
+      status,
       requestId: requestContext.requestId,
     })
   }
