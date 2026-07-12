@@ -15,6 +15,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+import { readApiResponse } from "@/lib/client-api"
 import { formatDuration, getDailyRoute, getTodayDateString } from "@/lib/daily"
 
 type LeaderboardSummaryState = LeaderboardSummaryResponse
@@ -178,8 +179,14 @@ export function LeaderboardBoard() {
       throw new Error("Failed to load leaderboard data.")
     }
 
-    const nextSummary = (await summaryResponse.json()) as LeaderboardSummaryResponse
-    const nextDaily = (await dailyResponse.json()) as { entries: DailyLeaderboardEntry[] }
+    const nextSummary = await readApiResponse<LeaderboardSummaryResponse>(
+      summaryResponse,
+      "Failed to load leaderboard data."
+    )
+    const nextDaily = await readApiResponse<{ entries: DailyLeaderboardEntry[] }>(
+      dailyResponse,
+      "Failed to load leaderboard data."
+    )
 
     return {
       summary: nextSummary,
@@ -238,10 +245,10 @@ export function LeaderboardBoard() {
         },
         body: JSON.stringify({ handle: handleInput }),
       })
-      const result = (await response.json()) as ClaimIdentityResponse & { message?: string }
+      const result = await readApiResponse<ClaimIdentityResponse>(response, "Failed to claim identity.")
 
-      if (!response.ok || !("recoveryCode" in result)) {
-        throw new Error(result.message ?? "Failed to claim identity.")
+      if (!("recoveryCode" in result)) {
+        throw new Error("Failed to claim identity.")
       }
 
       setLatestRecoveryCode(result.recoveryCode)
@@ -281,10 +288,13 @@ export function LeaderboardBoard() {
           recoveryCode: recoveryCodeInput,
         }),
       })
-      const result = (await response.json()) as RecoverSessionResponse & { message?: string }
+      const result = await readApiResponse<RecoverSessionResponse>(
+        response,
+        "Failed to recover session."
+      )
 
-      if (!response.ok || !("sessionId" in result)) {
-        throw new Error(result.message ?? "Failed to recover session.")
+      if (!("sessionId" in result)) {
+        throw new Error("Failed to recover session.")
       }
 
       setLatestRecoveryCode(null)

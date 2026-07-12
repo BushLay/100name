@@ -9,6 +9,7 @@ import { GuessList } from "@/components/GuessList"
 import { ScoreBoard } from "@/components/ScoreBoard"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
+import { readApiResponse } from "@/lib/client-api"
 import { WINNING_SCORE, checkWinCondition } from "@/lib/game"
 
 type Feedback = {
@@ -80,7 +81,10 @@ function GameBoardClient() {
           throw new Error("Failed to load open game state.")
         }
 
-        const payload = (await response.json()) as { state: OpenGameState }
+        const payload = await readApiResponse<{ state: OpenGameState }>(
+          response,
+          "Failed to load open game state."
+        )
 
         if (!cancelled) {
           setGameState(payload.state)
@@ -140,9 +144,12 @@ function GameBoardClient() {
         body: JSON.stringify({ name }),
       })
 
-      const result = (await response.json()) as SubmitOpenGuessResponse | { message?: string }
+      const result = await readApiResponse<SubmitOpenGuessResponse | { message?: string }>(
+        response,
+        "Failed to submit open-mode guess."
+      )
 
-      if (!response.ok || !("state" in result)) {
+      if (!("state" in result)) {
         throw new Error(result.message ?? "Failed to submit open-mode guess.")
       }
 

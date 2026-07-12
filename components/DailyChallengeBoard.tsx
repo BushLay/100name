@@ -23,6 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { readApiResponse } from "@/lib/client-api"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { formatDuration, getDailyRoute, type DailyChallenge } from "@/lib/daily"
@@ -119,10 +120,10 @@ async function fetchDailyState(date: string) {
     throw new Error("Failed to load the daily challenge.")
   }
 
-  return (await response.json()) as {
+  return await readApiResponse<{
     state: DailyChallengeState
     overview: OverviewAnalytics
-  }
+  }>(response, "Failed to load the daily challenge.")
 }
 
 export function DailyChallengeBoard({ challenge }: DailyChallengeBoardProps) {
@@ -264,9 +265,12 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
         }),
       })
 
-      const result = (await response.json()) as SubmitGuessResponse | { message?: string }
+      const result = await readApiResponse<SubmitGuessResponse | { message?: string }>(
+        response,
+        "Failed to submit guess."
+      )
 
-      if (!response.ok || !("state" in result)) {
+      if (!("state" in result)) {
         throw new Error(result.message ?? "Failed to submit guess.")
       }
 
@@ -324,7 +328,10 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
         return
       }
 
-      const result = (await response.json()) as TrackShareResponse
+      const result = await readApiResponse<TrackShareResponse>(
+        response,
+        "Failed to track share."
+      )
 
       setDailyState((current) => ({
         ...current,
