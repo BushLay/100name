@@ -79,6 +79,18 @@ const DAILY_THEME_COPY: Record<DailyThemeId, DailyThemeCopy> = {
     uniquenessNote:
       "Bands do not count, and songwriters only count when the entity is also identified as a singer in the data used by the validator.",
   },
+  "elle-cast": {
+    inputType:
+      "Enter credited cast members from the curated Elle answer set, one actor name at a time.",
+    validationRule:
+      "This featured board validates against a local Elle cast library rather than an open Wikidata occupation rule, so only names in the configured cast list count.",
+    exampleHint:
+      "Start with the lead performers and prominent supporting cast from the IMDb full-credits page, then work outward to the less obvious names without repeating a previous answer.",
+    challengeAngle:
+      "TV cast event boards are tighter and more fandom-driven than open occupation themes, so precise recall matters more than broad category exploration.",
+    uniquenessNote:
+      "Special-event cast days can accept only the specific credited people selected for that date, even when the show itself has a much larger extended credits page.",
+  },
   "silo-season-3-cast": {
     inputType:
       "Enter credited cast members from the curated Silo Season 3 answer set, one person name at a time.",
@@ -90,6 +102,90 @@ const DAILY_THEME_COPY: Record<DailyThemeId, DailyThemeCopy> = {
       "Curated event boards turn the daily route into a compact fandom challenge where precision matters more than broad knowledge discovery.",
     uniquenessNote:
       "Special-event days can use accepted aliases and stage names, but the answer still has to belong to the configured cast library for the featured date.",
+  },
+  "the-terror-devil-in-silver-cast": {
+    inputType:
+      "Enter credited cast members from the curated The Terror: Devil in Silver answer set, one person name at a time.",
+    validationRule:
+      "This featured board validates against a local The Terror: Devil in Silver cast library, so only names in the configured cast list count.",
+    exampleHint:
+      "Start with the headline performers and recognizable supporting cast, then widen into the less obvious names from the TMDB cast source without repeating an answer.",
+    challengeAngle:
+      "This board plays like a compact horror-series recall test: the category is narrow, but the acceptable list is broad enough that players can choose their own route to twenty.",
+    uniquenessNote:
+      "For this fixed-list TV challenge, credited cast names count while directors, producers, writers, and other crew names do not.",
+  },
+  "worst-neighbor-ever-cast": {
+    inputType:
+      "Enter credited names from the curated Worst Neighbor Ever answer set, one person name at a time.",
+    validationRule:
+      "This featured board validates against a local Worst Neighbor Ever cast library rather than an open Wikidata occupation rule, so only names in the configured cast list count.",
+    exampleHint:
+      "Think through the credited people shown in the IMDb cast section and use the wider list to reach twenty without needing every possible name.",
+    challengeAngle:
+      "Docu-series boards reward careful source recall more than celebrity familiarity, which makes the challenge feel a little more like evidence-board detective work.",
+    uniquenessNote:
+      "The answer set intentionally comes from the cast section only, so production crew and other full-credits names are not valid for this date.",
+  },
+  "enola-holmes-3-cast": {
+    inputType:
+      "Enter credited cast members from the curated Enola Holmes 3 answer set, one actor name at a time.",
+    validationRule:
+      "This featured board validates against a local Enola Holmes 3 cast library, so only names in the configured cast list count.",
+    exampleHint:
+      "Start with the returning leads and prominent supporting performers, then branch into smaller credited roles from the IMDb cast section.",
+    challengeAngle:
+      "Franchise film boards often start fast because the leads are memorable, but completing the run asks players to remember beyond the obvious names.",
+    uniquenessNote:
+      "Actor names count for this board; character names, crew members, and unrelated franchise performers do not.",
+  },
+  "renovation-resort-cast": {
+    inputType:
+      "Enter credited names from the curated Renovation Resort answer set, one person name at a time.",
+    validationRule:
+      "This featured board validates against a local Renovation Resort cast library, so only names in the configured cast list count.",
+    exampleHint:
+      "Use hosts, designers, contestants, and other credited on-screen names from the IMDb cast section to build toward twenty accepted answers.",
+    challengeAngle:
+      "Reality and home-renovation boards feel different from scripted cast lists because memorable personalities, teams, and guest appearances can all matter.",
+    uniquenessNote:
+      "The board uses the cast/on-screen credit section, not the full crew list, so behind-the-camera credits are intentionally excluded.",
+  },
+  "silo-cast": {
+    inputType:
+      "Enter credited cast members from the curated full-series Silo answer set, one actor name at a time.",
+    validationRule:
+      "This featured board validates against a local Silo cast library built from the IMDb cast section, so only configured cast names count.",
+    exampleHint:
+      "Start with the main silo residents and recurring performers, then branch into smaller credited roles from across the full series list.",
+    challengeAngle:
+      "A full-series Silo board is broader than a single-season feature, so players can reach twenty through leads, recurring characters, or deep-cut supporting names.",
+    uniquenessNote:
+      "This date uses cast names only; writers, directors, producers, and other crew from the full credits page are excluded.",
+  },
+  "little-house-on-the-prairie-cast": {
+    inputType:
+      "Enter credited cast members from the curated Little House on the Prairie answer set, one actor name at a time.",
+    validationRule:
+      "This featured board validates against a local Little House on the Prairie cast library, so only names in the configured cast section count.",
+    exampleHint:
+      "Think about the family leads, neighbors, townspeople, and supporting performers listed on the IMDb cast page.",
+    challengeAngle:
+      "Revival and adaptation boards reward both headline-name recall and attention to newer supporting cast members.",
+    uniquenessNote:
+      "Actor names count for this board; character names and behind-the-camera credits do not.",
+  },
+  "the-five-star-weekend-cast": {
+    inputType:
+      "Enter credited cast members from the curated The Five-Star Weekend answer set, one actor name at a time.",
+    validationRule:
+      "This featured board validates against a local The Five-Star Weekend cast library, so only names in the configured cast list count.",
+    exampleHint:
+      "Begin with the ensemble leads and recognizable guest performers, then use the wider cast list to finish the board without needing every name.",
+    challengeAngle:
+      "Ensemble drama boards feel social and memory-driven: the challenge is not just one lead, but the web of friends, guests, and supporting roles around them.",
+    uniquenessNote:
+      "The board accepts credited cast members only, not production, writing, casting, or stunt department names from the same full credits page.",
   },
 }
 

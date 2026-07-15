@@ -1,6 +1,14 @@
 import type { GuessRuleValidator } from "./game.ts"
 import {
+  ELLE_CAST_LIBRARY,
+  ENOLA_HOLMES_3_CAST_LIBRARY,
+  LITTLE_HOUSE_ON_THE_PRAIRIE_CAST_LIBRARY,
+  RENOVATION_RESORT_CAST_LIBRARY,
+  SILO_CAST_LIBRARY,
   SILO_SEASON_3_CAST_LIBRARY,
+  THE_FIVE_STAR_WEEKEND_CAST_LIBRARY,
+  THE_TERROR_DEVIL_IN_SILVER_CAST_LIBRARY,
+  WORST_NEIGHBOR_EVER_CAST_LIBRARY,
   buildCuratedPersonQueryValidator,
   buildCuratedPersonValidator,
 } from "./curated-answer-libraries.ts"
@@ -16,7 +24,15 @@ export type DailyThemeId =
   | "female-fictional-characters"
   | "female-directors"
   | "female-singers"
+  | "elle-cast"
   | "silo-season-3-cast"
+  | "the-terror-devil-in-silver-cast"
+  | "worst-neighbor-ever-cast"
+  | "enola-holmes-3-cast"
+  | "renovation-resort-cast"
+  | "silo-cast"
+  | "little-house-on-the-prairie-cast"
+  | "the-five-star-weekend-cast"
 
 export type DailyFaqItem = {
   question: string
@@ -190,6 +206,45 @@ const DAILY_THEMES: DailyThemeDefinition[] = [
     validator: validateFemaleSinger,
   },
   {
+    id: "elle-cast",
+    title: "Elle Cast Challenge",
+    headline: "Name actors from the Elle cast list.",
+    description:
+      "Today's special challenge uses a curated cast list for Elle. Enter credited cast members one by one and clear twenty correct names, or all available names if the cast list is smaller than twenty.",
+    categoryLabel: "Elle cast",
+    promptLabel: "Submit an Elle cast member",
+    shareLabel: "Elle cast members",
+    shareTitle: "Elle cast challenge",
+    targetScore: Math.min(20, ELLE_CAST_LIBRARY.entries.length),
+    invalidEntityMessage:
+      "That answer is not in today's Elle cast list.",
+    successMessage: "Correct Elle cast member added to today's board.",
+    faq: [
+      {
+        question: "What counts today?",
+        answer:
+          "Only credited cast members from the curated Elle answer list count.",
+      },
+      {
+        question: "Do I need the character name too?",
+        answer:
+          "No. Enter the actor's name, and the game will match it against today's cast list.",
+      },
+      {
+        question: "Why is this a fixed-list challenge?",
+        answer:
+          "This is a featured TV cast board built from a specific public source, so only the selected credited names are valid answers.",
+      },
+      {
+        question: "Do I need to find every actor?",
+        answer:
+          "No. If the cast list has twenty or more valid names, you only need any twenty to finish. If a featured cast list is shorter than twenty, then clearing the full list completes the board.",
+      },
+    ],
+    validator: buildCuratedPersonValidator(ELLE_CAST_LIBRARY),
+    queryValidator: buildCuratedPersonQueryValidator(ELLE_CAST_LIBRARY),
+  },
+  {
     id: "silo-season-3-cast",
     title: "Silo Season 3 Cast Challenge",
     headline: "Name actors from the Silo Season 3 cast list.",
@@ -223,9 +278,286 @@ const DAILY_THEMES: DailyThemeDefinition[] = [
     validator: buildCuratedPersonValidator(SILO_SEASON_3_CAST_LIBRARY),
     queryValidator: buildCuratedPersonQueryValidator(SILO_SEASON_3_CAST_LIBRARY),
   },
+  {
+    id: "the-terror-devil-in-silver-cast",
+    title: "The Terror: Devil in Silver Cast Challenge",
+    headline: "Name actors from The Terror: Devil in Silver.",
+    description:
+      "Today's special challenge uses the curated cast list for The Terror: Devil in Silver. Enter credited cast members one by one and clear twenty correct names, or all available names if the cast list is smaller than twenty.",
+    categoryLabel: "The Terror: Devil in Silver cast",
+    promptLabel: "Submit a The Terror cast member",
+    shareLabel: "The Terror: Devil in Silver cast members",
+    shareTitle: "The Terror: Devil in Silver cast challenge",
+    targetScore: Math.min(
+      20,
+      THE_TERROR_DEVIL_IN_SILVER_CAST_LIBRARY.entries.length
+    ),
+    invalidEntityMessage:
+      "That answer is not in today's The Terror: Devil in Silver cast list.",
+    successMessage:
+      "Correct The Terror: Devil in Silver cast member added to today's board.",
+    faq: [
+      {
+        question: "What counts today?",
+        answer:
+          "Only credited cast members from the curated The Terror: Devil in Silver answer list count.",
+      },
+      {
+        question: "Do I need the character name too?",
+        answer:
+          "No. Enter the actor's name, and the game will match it against today's cast list.",
+      },
+      {
+        question: "Do I need to find every actor?",
+        answer:
+          "No. If the cast list has twenty or more valid names, you only need any twenty to finish. If a featured cast list is shorter than twenty, then clearing the full list completes the board.",
+      },
+      {
+        question: "Why is this a fixed-list challenge?",
+        answer:
+          "This is a featured TV cast board built from a specific public cast source, so only the selected credited names are valid answers.",
+      },
+    ],
+    validator: buildCuratedPersonValidator(
+      THE_TERROR_DEVIL_IN_SILVER_CAST_LIBRARY
+    ),
+    queryValidator: buildCuratedPersonQueryValidator(
+      THE_TERROR_DEVIL_IN_SILVER_CAST_LIBRARY
+    ),
+  },
+  {
+    id: "worst-neighbor-ever-cast",
+    title: "Worst Neighbor Ever Cast Challenge",
+    headline: "Name people from the Worst Neighbor Ever cast list.",
+    description:
+      "Today's special challenge uses the curated cast list for Worst Neighbor Ever. Enter credited names one by one and clear twenty correct answers, or all available names if the cast list is smaller than twenty.",
+    categoryLabel: "Worst Neighbor Ever cast",
+    promptLabel: "Submit a Worst Neighbor Ever cast member",
+    shareLabel: "Worst Neighbor Ever cast members",
+    shareTitle: "Worst Neighbor Ever cast challenge",
+    targetScore: Math.min(20, WORST_NEIGHBOR_EVER_CAST_LIBRARY.entries.length),
+    invalidEntityMessage:
+      "That answer is not in today's Worst Neighbor Ever cast list.",
+    successMessage:
+      "Correct Worst Neighbor Ever cast member added to today's board.",
+    faq: [
+      {
+        question: "What counts today?",
+        answer:
+          "Only credited people from the curated Worst Neighbor Ever answer list count.",
+      },
+      {
+        question: "Do I need a character or episode title too?",
+        answer:
+          "No. Enter the credited person's name, and the game will match it against today's cast list.",
+      },
+      {
+        question: "Do I need to find every listed person?",
+        answer:
+          "No. Since this list has twenty or more names, any twenty accepted answers complete the board.",
+      },
+    ],
+    validator: buildCuratedPersonValidator(WORST_NEIGHBOR_EVER_CAST_LIBRARY),
+    queryValidator: buildCuratedPersonQueryValidator(
+      WORST_NEIGHBOR_EVER_CAST_LIBRARY
+    ),
+  },
+  {
+    id: "enola-holmes-3-cast",
+    title: "Enola Holmes 3 Cast Challenge",
+    headline: "Name actors from the Enola Holmes 3 cast list.",
+    description:
+      "Today's special challenge uses the curated cast list for Enola Holmes 3. Enter credited cast members one by one and clear twenty correct names, or all available names if the cast list is smaller than twenty.",
+    categoryLabel: "Enola Holmes 3 cast",
+    promptLabel: "Submit an Enola Holmes 3 cast member",
+    shareLabel: "Enola Holmes 3 cast members",
+    shareTitle: "Enola Holmes 3 cast challenge",
+    targetScore: Math.min(20, ENOLA_HOLMES_3_CAST_LIBRARY.entries.length),
+    invalidEntityMessage:
+      "That answer is not in today's Enola Holmes 3 cast list.",
+    successMessage:
+      "Correct Enola Holmes 3 cast member added to today's board.",
+    faq: [
+      {
+        question: "What counts today?",
+        answer:
+          "Only credited cast members from the curated Enola Holmes 3 answer list count.",
+      },
+      {
+        question: "Do I need the role name too?",
+        answer:
+          "No. Enter the actor's name, and the game will match it against today's cast list.",
+      },
+      {
+        question: "Do I need to find every actor?",
+        answer:
+          "No. Since this list has twenty or more names, any twenty accepted answers complete the board.",
+      },
+    ],
+    validator: buildCuratedPersonValidator(ENOLA_HOLMES_3_CAST_LIBRARY),
+    queryValidator: buildCuratedPersonQueryValidator(ENOLA_HOLMES_3_CAST_LIBRARY),
+  },
+  {
+    id: "renovation-resort-cast",
+    title: "Renovation Resort Cast Challenge",
+    headline: "Name people from the Renovation Resort cast list.",
+    description:
+      "Today's special challenge uses the curated cast list for Renovation Resort. Enter credited names one by one and clear twenty correct answers, or all available names if the cast list is smaller than twenty.",
+    categoryLabel: "Renovation Resort cast",
+    promptLabel: "Submit a Renovation Resort cast member",
+    shareLabel: "Renovation Resort cast members",
+    shareTitle: "Renovation Resort cast challenge",
+    targetScore: Math.min(20, RENOVATION_RESORT_CAST_LIBRARY.entries.length),
+    invalidEntityMessage:
+      "That answer is not in today's Renovation Resort cast list.",
+    successMessage:
+      "Correct Renovation Resort cast member added to today's board.",
+    faq: [
+      {
+        question: "What counts today?",
+        answer:
+          "Only credited people from the curated Renovation Resort answer list count.",
+      },
+      {
+        question: "Do I need the project or episode name too?",
+        answer:
+          "No. Enter the credited person's name, and the game will match it against today's cast list.",
+      },
+      {
+        question: "Do I need to find every listed person?",
+        answer:
+          "No. Since this list has twenty or more names, any twenty accepted answers complete the board.",
+      },
+    ],
+    validator: buildCuratedPersonValidator(RENOVATION_RESORT_CAST_LIBRARY),
+    queryValidator: buildCuratedPersonQueryValidator(RENOVATION_RESORT_CAST_LIBRARY),
+  },
+  {
+    id: "silo-cast",
+    title: "Silo Cast Challenge",
+    headline: "Name actors from the Silo cast list.",
+    description:
+      "Today's special challenge uses the curated full-series cast list for Silo. Enter credited cast members one by one and clear twenty correct names, or all available names if the cast list is smaller than twenty.",
+    categoryLabel: "Silo cast",
+    promptLabel: "Submit a Silo cast member",
+    shareLabel: "Silo cast members",
+    shareTitle: "Silo cast challenge",
+    targetScore: Math.min(20, SILO_CAST_LIBRARY.entries.length),
+    invalidEntityMessage:
+      "That answer is not in today's Silo cast list.",
+    successMessage: "Correct Silo cast member added to today's board.",
+    faq: [
+      {
+        question: "What counts today?",
+        answer:
+          "Only credited cast members from the curated Silo IMDb cast section count.",
+      },
+      {
+        question: "Is this the same as the earlier Silo Season 3 board?",
+        answer:
+          "No. This board uses the broader IMDb cast list for Silo, while the earlier Silo Season 3 board used a smaller featured source.",
+      },
+      {
+        question: "Do I need to find every actor?",
+        answer:
+          "No. Since this list has twenty or more names, any twenty accepted answers complete the board.",
+      },
+    ],
+    validator: buildCuratedPersonValidator(SILO_CAST_LIBRARY),
+    queryValidator: buildCuratedPersonQueryValidator(SILO_CAST_LIBRARY),
+  },
+  {
+    id: "little-house-on-the-prairie-cast",
+    title: "Little House on the Prairie Cast Challenge",
+    headline: "Name actors from the Little House on the Prairie cast list.",
+    description:
+      "Today's special challenge uses the curated cast list for Little House on the Prairie. Enter credited cast members one by one and clear twenty correct names, or all available names if the cast list is smaller than twenty.",
+    categoryLabel: "Little House on the Prairie cast",
+    promptLabel: "Submit a Little House cast member",
+    shareLabel: "Little House on the Prairie cast members",
+    shareTitle: "Little House on the Prairie cast challenge",
+    targetScore: Math.min(
+      20,
+      LITTLE_HOUSE_ON_THE_PRAIRIE_CAST_LIBRARY.entries.length
+    ),
+    invalidEntityMessage:
+      "That answer is not in today's Little House on the Prairie cast list.",
+    successMessage:
+      "Correct Little House on the Prairie cast member added to today's board.",
+    faq: [
+      {
+        question: "What counts today?",
+        answer:
+          "Only credited cast members from the curated Little House on the Prairie answer list count.",
+      },
+      {
+        question: "Do I need the role name too?",
+        answer:
+          "No. Enter the actor's name, and the game will match it against today's cast list.",
+      },
+      {
+        question: "Do I need to find every actor?",
+        answer:
+          "No. Since this list has twenty or more names, any twenty accepted answers complete the board.",
+      },
+    ],
+    validator: buildCuratedPersonValidator(
+      LITTLE_HOUSE_ON_THE_PRAIRIE_CAST_LIBRARY
+    ),
+    queryValidator: buildCuratedPersonQueryValidator(
+      LITTLE_HOUSE_ON_THE_PRAIRIE_CAST_LIBRARY
+    ),
+  },
+  {
+    id: "the-five-star-weekend-cast",
+    title: "The Five-Star Weekend Cast Challenge",
+    headline: "Name actors from The Five-Star Weekend cast list.",
+    description:
+      "Today's special challenge uses the curated cast list for The Five-Star Weekend. Enter credited cast members one by one and clear twenty correct names, or all available names if the cast list is smaller than twenty.",
+    categoryLabel: "The Five-Star Weekend cast",
+    promptLabel: "Submit a Five-Star Weekend cast member",
+    shareLabel: "The Five-Star Weekend cast members",
+    shareTitle: "The Five-Star Weekend cast challenge",
+    targetScore: Math.min(20, THE_FIVE_STAR_WEEKEND_CAST_LIBRARY.entries.length),
+    invalidEntityMessage:
+      "That answer is not in today's The Five-Star Weekend cast list.",
+    successMessage:
+      "Correct The Five-Star Weekend cast member added to today's board.",
+    faq: [
+      {
+        question: "What counts today?",
+        answer:
+          "Only credited cast members from the curated The Five-Star Weekend answer list count.",
+      },
+      {
+        question: "Do I need the character name too?",
+        answer:
+          "No. Enter the actor's name, and the game will match it against today's cast list.",
+      },
+      {
+        question: "Do I need to find every actor?",
+        answer:
+          "No. Since this list has twenty or more names, any twenty accepted answers complete the board.",
+      },
+    ],
+    validator: buildCuratedPersonValidator(THE_FIVE_STAR_WEEKEND_CAST_LIBRARY),
+    queryValidator: buildCuratedPersonQueryValidator(
+      THE_FIVE_STAR_WEEKEND_CAST_LIBRARY
+    ),
+  },
 ]
 
 const DAILY_THEME_OVERRIDES: Partial<Record<string, DailyThemeId>> = {
+  "2026-07-14": "elle-cast",
+  "2026-07-15": "the-terror-devil-in-silver-cast",
+  "2026-07-16": "worst-neighbor-ever-cast",
+  "2026-07-17": "enola-holmes-3-cast",
+  "2026-07-18": "renovation-resort-cast",
+  "2026-07-19": "silo-cast",
+  "2026-07-20": "little-house-on-the-prairie-cast",
+  "2026-07-21": "enola-holmes-3-cast",
+  "2026-07-22": "elle-cast",
+  "2026-07-23": "the-five-star-weekend-cast",
   "2026-07-11": "silo-season-3-cast",
 }
 
