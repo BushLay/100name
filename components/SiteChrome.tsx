@@ -1,5 +1,4 @@
 import { SiteNavShell } from "@/components/SiteNavShell"
-import { getDailyRoute, getTodayDateString } from "@/lib/daily"
 
 type SiteChromeProps = {
   children: React.ReactNode
@@ -15,7 +14,7 @@ export function SiteChrome({ children }: SiteChromeProps) {
   return (
     <SiteNavShell
       navigationItems={navigationItems}
-      todayHref={getDailyRoute(getTodayDateString())}
+      todayHref="/daily/today"
     >
       {children}
     </SiteNavShell>
