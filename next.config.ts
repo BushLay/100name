@@ -16,6 +16,15 @@ const contentSecurityPolicyReportOnly = [
 ].join("; ")
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "findly.tools",
+        pathname: "/badges/**",
+      },
+    ],
+  },
   outputFileTracingExcludes: {
     "/*": ["./lib/server/backend-store.ts"],
   },

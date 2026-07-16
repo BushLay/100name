@@ -137,17 +137,35 @@ export function SiteNavShell({
           <p className="text-sm text-muted-foreground">
             Keep moving through the site from here too, even if you landed on a subpage first.
           </p>
-          <div className="flex flex-wrap gap-2">
-            {allItems.map((item) => (
-              <Link
-                className={navLinkClassName(isActivePath(pathname, item.href, todayHref))}
-                href={item.href}
-                key={`footer-${item.href}`}
-                onClick={() => setMenuOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
+          <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+            <div className="flex flex-wrap gap-2">
+              {allItems.map((item) => (
+                <Link
+                  className={navLinkClassName(isActivePath(pathname, item.href, todayHref))}
+                  href={item.href}
+                  key={`footer-${item.href}`}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+            <a
+              aria-label="Featured on Findly.tools"
+              className="inline-flex w-fit rounded-xl transition hover:opacity-85"
+              href="https://findly.tools/100names?utm_source=100names"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <Image
+                alt="Featured on Findly.tools"
+                className="h-[55px] w-[175px]"
+                height="55"
+                src="https://findly.tools/badges/findly-tools-badge-light.svg"
+                unoptimized
+                width="175"
+              />
+            </a>
           </div>
         </div>
       </footer>
