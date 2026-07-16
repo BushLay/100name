@@ -54,7 +54,8 @@ test("daily helpers format urls, durations, and share text", () => {
   assert.equal(formatDuration(133000), "2m 13s")
   assert.equal(isValidChallengeDate("2026-07-01"), true)
   assert.equal(isValidChallengeDate("2026/07/01"), false)
-  assert.equal(getTodayDateString(new Date(2026, 6, 8, 0, 30, 0)), "2026-07-08")
+  assert.equal(getTodayDateString(new Date("2026-07-07T16:30:00.000Z")), "2026-07-08")
+  assert.equal(getTodayDateString(new Date("2026-07-15T16:30:00.000Z")), "2026-07-16")
 
   const text = buildDailyShareText({
     date: "2026-07-01",

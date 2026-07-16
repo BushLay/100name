@@ -23,14 +23,14 @@ async function readProjectFile(relativePath: string) {
 }
 
 test("sitemap excludes future daily routes and keeps canonical core pages", () => {
-  const entries = getSitemapEntries()
+  const entries = getSitemapEntries("2026-07-11")
   const urls = entries.map((entry) => entry.url)
 
   assert.equal(urls.includes(buildCanonicalUrl("/")), true)
   assert.equal(urls.includes(buildCanonicalUrl("/how-to-play")), true)
   assert.equal(urls.includes(buildCanonicalUrl("/leaderboard")), true)
-  assert.equal(urls.some((url) => url.includes("/daily/2026-07-12")), false)
   assert.equal(urls.some((url) => url.includes("/daily/2026-07-11")), true)
+  assert.equal(urls.some((url) => url.includes("/daily/2026-07-12")), false)
 })
 
 test("robots points at the canonical sitemap", () => {

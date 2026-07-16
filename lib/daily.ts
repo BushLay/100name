@@ -72,6 +72,7 @@ export type DailyChallenge = {
 }
 
 export const DAILY_CHALLENGE_START_DATE = "2026-01-03"
+export const DAILY_CHALLENGE_TIME_ZONE = "Asia/Shanghai"
 
 const DAILY_THEMES: DailyThemeDefinition[] = [
   {
@@ -580,10 +581,20 @@ export function getDailyRoute(date: string) {
   return `/daily/${date}`
 }
 
-export function getTodayDateString(date = new Date()) {
-  const year = date.getFullYear()
-  const month = `${date.getMonth() + 1}`.padStart(2, "0")
-  const day = `${date.getDate()}`.padStart(2, "0")
+export function getTodayDateString(
+  date = new Date(),
+  timeZone = DAILY_CHALLENGE_TIME_ZONE
+) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date)
+
+  const year = parts.find((part) => part.type === "year")?.value ?? "1970"
+  const month = parts.find((part) => part.type === "month")?.value ?? "01"
+  const day = parts.find((part) => part.type === "day")?.value ?? "01"
 
   return `${year}-${month}-${day}`
 }

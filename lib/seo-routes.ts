@@ -1,10 +1,10 @@
 import type { MetadataRoute } from "next"
 
-import { getDailyRoute, getOpenDailyDates } from "./daily.ts"
+import { getDailyRoute, getOpenDailyDates, getTodayDateString } from "./daily.ts"
 import { buildCanonicalUrl, getCanonicalSiteUrl } from "./site.ts"
 
-export function getSitemapEntries(): MetadataRoute.Sitemap {
-  const dailyPages = getOpenDailyDates().map((date) => ({
+export function getSitemapEntries(today = getTodayDateString()): MetadataRoute.Sitemap {
+  const dailyPages = getOpenDailyDates(today).map((date) => ({
     url: buildCanonicalUrl(getDailyRoute(date)),
     lastModified: new Date(`${date}T00:00:00Z`),
     changeFrequency: "daily" as const,
