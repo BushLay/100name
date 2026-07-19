@@ -106,53 +106,53 @@ export function GameInput({
   }
 
   return (
-    <Card className="overflow-hidden border-[rgba(255,200,174,0.34)] bg-[linear-gradient(180deg,#2a1634_0%,#351d45_45%,#291735_100%)] text-amber-50 shadow-[0_34px_120px_rgba(42,22,52,0.42)]">
-      <CardHeader className="gap-5 border-b border-white/8 bg-[radial-gradient(circle_at_top,rgba(255,194,152,0.12),transparent_36%)] pb-5">
+    <Card className="overflow-hidden border-[#241c15] bg-[#fbefe3] text-[#241c15] shadow-[6px_6px_0_#241c15] dark:border-[#fffaf1] dark:bg-[#30261e] dark:text-[#fffaf1] dark:shadow-[6px_6px_0_#fffaf1]">
+      <CardHeader className="gap-5 border-b-2 border-[#241c15] bg-[#ffe01b] pb-5 text-[#241c15] dark:border-[#fffaf1]">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-2">
             <div className="flex flex-wrap gap-2">
-              <Badge className="border-white/10 bg-white/10 text-amber-50 hover:bg-white/10">
+              <Badge className="border-2 border-[#241c15] bg-white text-[#241c15]">
                 Answer Board
               </Badge>
-              <Badge className="border-[#f0c3a7]/25 bg-[#f0c3a7]/10 text-[#ffd7b2] hover:bg-[#f0c3a7]/10">
+              <Badge className="border-2 border-[#241c15] bg-[#fbefe3] text-[#241c15]">
                 Press Enter To Check
               </Badge>
             </div>
-            <CardTitle className="text-3xl tracking-tight text-[#ffd3b4] sm:text-4xl">
+            <CardTitle className="doodle-underline text-4xl font-black text-[#241c15] sm:text-5xl">
               {title}
             </CardTitle>
-            <CardDescription className="max-w-3xl text-sm leading-7 text-[#f5d6c0]/78">
+            <CardDescription className="max-w-3xl text-base leading-7 text-[#4a3c31]">
               {description}
             </CardDescription>
           </div>
-          <div className="min-w-[9rem] rounded-3xl border border-[#f0c3a7]/18 bg-white/6 px-5 py-4 text-right shadow-inner">
-            <p className="text-xs uppercase tracking-[0.28em] text-[#d8b6a1]/78">Progress</p>
-            <p className="mt-2 text-3xl font-black text-[#ffd3b4]">
+          <div className="min-w-[9rem] rounded-lg border-2 border-[#241c15] bg-white px-5 py-4 text-right shadow-[3px_3px_0_#241c15]">
+            <p className="text-xs font-bold text-[#6f6a64]">Progress</p>
+            <p className="mt-2 text-3xl font-black text-[#241c15]">
               {score}/{targetScore}
             </p>
           </div>
         </div>
 
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm font-medium text-[#f4d0ba]">
+          <div className="flex items-center justify-between text-sm font-bold text-[#241c15]">
             <span>{loading ? "Checking current slot..." : "Board status"}</span>
             <span>{Math.round(progress)}%</span>
           </div>
-          <div className="h-3 overflow-hidden rounded-full bg-white/8">
+          <div className="h-3 overflow-hidden rounded-full border-2 border-[#241c15] bg-white">
             <div
               aria-hidden="true"
-              className="h-full rounded-full bg-[linear-gradient(90deg,#f3c0aa_0%,#dc8dc0_55%,#8cf4b6_100%)] transition-[width] duration-500"
+              className="h-full rounded-full bg-[#ff4d74] transition-[width] duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-white/8 bg-white/6 px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border-2 border-[#241c15] bg-[#fbefe3] px-4 py-3">
           <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.24em] text-[#d8b6a1]/78">
+            <p className="text-xs font-bold text-[#6f6a64]">
               Latest Result
             </p>
-            <p className="text-sm leading-6 text-[#ffe1cb]">
+            <p className="text-sm leading-6 text-[#241c15]">
               {feedback?.text ?? "Start typing in the next empty slot and press Enter to validate."}
             </p>
           </div>
@@ -164,7 +164,7 @@ export function GameInput({
                   ? "border-amber-300/30 bg-amber-300/14 text-amber-100"
                   : feedback?.tone === "error"
                     ? "border-rose-300/30 bg-rose-400/15 text-rose-100"
-                    : "border-white/10 bg-white/8 text-[#ffd3b4]"
+                    : "border-[#241c15] bg-white text-[#241c15]"
             }
           >
             {latestStatusLabel}
@@ -172,7 +172,7 @@ export function GameInput({
         </div>
       </CardHeader>
 
-      <CardContent className="p-5 sm:p-6">
+      <CardContent className="bg-[#fbefe3] p-5 dark:bg-[#30261e] sm:p-6">
         <form onSubmit={handleSubmit}>
           <div className={gridClassName}>
             {Array.from({ length: visibleSlotCount }, (_, index) => {
@@ -194,12 +194,12 @@ export function GameInput({
                           : activeTone === "error"
                             ? "border-rose-300 bg-white text-slate-900 shadow-[0_0_0_2px_rgba(251,113,133,0.18)]"
                         : isActiveSlot
-                          ? "border-[#f4c4a7] bg-white text-slate-900 shadow-[0_0_0_2px_rgba(244,196,167,0.22)]"
-                          : "border-[#c89cae] bg-white/92 text-slate-500"
+                          ? "border-[#241c15] bg-white text-[#241c15] shadow-[3px_3px_0_#ffe01b]"
+                          : "border-[#8c8279] bg-white text-[#6f6a64]"
 
               return (
                 <div className="flex items-start gap-3" key={submittedEntry?.id ?? `slot-${index}`}>
-                  <div className="flex h-[3.35rem] w-7 items-center justify-center text-lg font-black text-[#ffd3b4]">
+                  <div className="flex h-[3.35rem] w-7 items-center justify-center text-lg font-black text-[#241c15] dark:text-[#ffe01b]">
                     {submittedEntry ? (
                       tone === "success" ? (
                         <Check className="h-5 w-5 text-emerald-300" />
@@ -219,7 +219,7 @@ export function GameInput({
                         <Input
                           autoComplete="off"
                           autoCorrect="off"
-                          className={`h-[3.35rem] rounded-2xl border-2 px-4 text-base font-medium ${slotClassName}`}
+                          className={`h-[3.35rem] rounded-lg border-2 px-4 text-base font-medium ${slotClassName}`}
                           disabled={loading}
                           onChange={(event) => setDraftValue(event.target.value)}
                           placeholder={loading ? "Checking..." : `Answer ${index + 1}`}
@@ -227,31 +227,31 @@ export function GameInput({
                           spellCheck={false}
                           value={draftValue}
                         />
-                        <p className="pl-1 text-xs text-[#d8b6a1]/78">
-                          Press <span className="font-semibold text-[#ffd3b4]">Enter</span> to
+                        <p className="pl-1 text-xs text-muted-foreground">
+                          Press <span className="font-bold text-foreground">Enter</span> to
                           validate this name. The next slot unlocks only after a correct answer.
                         </p>
                       </>
                     ) : submittedEntry ? (
                       <>
                         <div
-                          className={`flex min-h-[3.35rem] items-center rounded-2xl border-2 px-4 text-base font-medium ${slotClassName}`}
+                          className={`flex min-h-[3.35rem] items-center rounded-lg border-2 px-4 text-base font-medium ${slotClassName}`}
                         >
                           <span className="truncate">{submittedEntry.name || "Empty submission"}</span>
                         </div>
-                        <p className="pl-1 text-xs text-[#d8b6a1]/78">{submittedEntry.message}</p>
+                        <p className="pl-1 text-xs text-muted-foreground">{submittedEntry.message}</p>
                       </>
                     ) : (
                       <>
                         <div
-                          className={`flex min-h-[3.35rem] items-center rounded-2xl border-2 px-4 text-base font-medium ${slotClassName}`}
+                          className={`flex min-h-[3.35rem] items-center rounded-lg border-2 px-4 text-base font-medium ${slotClassName}`}
                         >
                           <span className="opacity-65">
                             {disabled ? "Locked" : `Waiting for slot ${index + 1}`}
                           </span>
                         </div>
                         {disabled ? (
-                          <p className="pl-1 text-xs text-[#d8b6a1]/55">
+                          <p className="pl-1 text-xs text-muted-foreground">
                             The board is currently locked.
                           </p>
                         ) : null}
@@ -265,7 +265,7 @@ export function GameInput({
         </form>
 
         {loading ? (
-          <div className="mt-5 flex items-center gap-3 rounded-3xl border border-white/8 bg-white/6 px-4 py-3 text-sm text-[#ffe1cb]">
+          <div className="mt-5 flex items-center gap-3 rounded-lg border-2 border-[#241c15] bg-[#ffe01b] px-4 py-3 text-sm font-semibold text-[#241c15]">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span>Checking the current guess against the live game rules.</span>
           </div>

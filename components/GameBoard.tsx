@@ -202,7 +202,7 @@ function GameBoardClient() {
       />
 
       <section className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
-        <Card className="overflow-hidden border-sky-200/70 bg-[linear-gradient(135deg,rgba(240,249,255,0.98),rgba(224,242,254,0.95)_48%,rgba(239,246,255,0.98)_100%)] shadow-[0_24px_80px_rgba(14,165,233,0.12)] backdrop-blur dark:border-sky-300/15 dark:bg-[linear-gradient(135deg,rgba(8,25,46,0.92),rgba(8,47,73,0.9)_48%,rgba(15,23,42,0.95)_100%)]">
+        <Card className="overflow-hidden bg-white dark:bg-[#30261e]">
           <CardContent className="p-6 sm:p-8">
             <div className="flex flex-col gap-4">
               <div className="flex flex-wrap gap-2">
@@ -224,24 +224,24 @@ function GameBoardClient() {
                     width={160}
                   />
                 </div>
-                <h1 className="max-w-2xl text-4xl font-semibold tracking-tight sm:text-5xl">
-                  Name 100: Daily Women Name Challenge
+                <h1 className="doodle-underline max-w-2xl text-4xl font-black sm:text-5xl">
+                  How many remarkable women can you name?
                 </h1>
                 <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-                  Submit a full name, let Wikidata judge it live, and keep stacking verified women until you clear the board.
+                  Type a full name. We&apos;ll check Wikidata. You bring the memory; we&apos;ll keep the score.
                 </p>
               </div>
               <div className="grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-sky-200/70 bg-white/70 p-3 text-sm shadow-sm dark:border-sky-300/10 dark:bg-white/5">
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Rule 01</p>
+                <div className="rounded-lg border-2 border-[#241c15] bg-[#fbefe3] p-3 text-sm dark:border-[#fffaf1] dark:bg-[#4a3c31]">
+                  <p className="text-xs font-bold text-muted-foreground">Rule 01</p>
                   <p className="mt-2 font-medium">Human only</p>
                 </div>
-                <div className="rounded-2xl border border-sky-200/70 bg-white/70 p-3 text-sm shadow-sm dark:border-sky-300/10 dark:bg-white/5">
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Rule 02</p>
+                <div className="rounded-lg border-2 border-[#241c15] bg-[#ffe01b] p-3 text-sm dark:border-[#fffaf1] dark:text-[#241c15]">
+                  <p className="text-xs font-bold text-[#6f6a64]">Rule 02</p>
                   <p className="mt-2 font-medium">Female only</p>
                 </div>
-                <div className="rounded-2xl border border-sky-200/70 bg-white/70 p-3 text-sm shadow-sm dark:border-sky-300/10 dark:bg-white/5">
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Rule 03</p>
+                <div className="rounded-lg border-2 border-[#241c15] bg-[#fbefe3] p-3 text-sm dark:border-[#fffaf1] dark:bg-[#4a3c31]">
+                  <p className="text-xs font-bold text-muted-foreground">Rule 03</p>
                   <p className="mt-2 font-medium">Wikipedia required</p>
                 </div>
               </div>
@@ -255,7 +255,7 @@ function GameBoardClient() {
       <GuessList guesses={gameState.acceptedGuesses} />
 
       {won ? (
-        <Card className="border-amber-300 bg-[linear-gradient(135deg,rgba(255,251,235,0.98),rgba(254,240,138,0.35))] dark:border-amber-900 dark:bg-amber-950/30">
+        <Card className="bg-[#ffe01b] text-[#241c15] dark:bg-[#ffe01b] dark:text-[#241c15]">
           <CardContent className="flex flex-col gap-2 p-5">
             <p className="text-lg font-semibold">Run cleared. You reached 100.</p>
             <p className="text-sm text-muted-foreground">

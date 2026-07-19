@@ -26,7 +26,12 @@ import {
 import { readApiResponse } from "@/lib/client-api"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
-import { formatDuration, getDailyRoute, type DailyChallenge } from "@/lib/daily"
+import { formatDuration, type DailyChallenge } from "@/lib/daily"
+import {
+  buildDailyResultDownloadPath,
+  buildDailyResultPath,
+  type DailyResultShareData,
+} from "@/lib/daily-result-share"
 
 type Feedback = {
   tone: "success" | "error" | "warning"
@@ -148,7 +153,7 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
   const [feedback, setFeedback] = useState<Feedback>(null)
   const [loading, setLoading] = useState(false)
   const [initializing, setInitializing] = useState(true)
-  const [copied, setCopied] = useState(false)
+  const [resultLinkCopied, setResultLinkCopied] = useState(false)
   const [shareBounce, setShareBounce] = useState(false)
   const [showResultDialog, setShowResultDialog] = useState(false)
   const [submissionHistory, setSubmissionHistory] = useState<
@@ -249,7 +254,7 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
 
   async function handleSubmit(name: string) {
     setLoading(true)
-    setCopied(false)
+    setResultLinkCopied(false)
 
     try {
       const response = await fetch(`/api/daily/${challenge.date}/guess`, {
@@ -306,15 +311,8 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
     }
   }
 
-  async function handleCopyShare() {
-    if (!currentAttempt.shareText) {
-      return
-    }
-
+  async function trackShareClick(destination: "copy" | "system_share") {
     try {
-      await navigator.clipboard.writeText(currentAttempt.shareText)
-      setCopied(true)
-
       const response = await fetch(`/api/daily/${challenge.date}/share`, {
         method: "POST",
         credentials: "include",
@@ -324,7 +322,7 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
         body: JSON.stringify({
           date: challenge.date,
           attemptId: currentAttempt.id,
-          destination: "copy",
+          destination,
         }),
       })
 
@@ -345,11 +343,50 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
         },
       }))
     } catch {
-      setCopied(false)
+      // Sharing should remain available even if analytics tracking fails.
     }
   }
 
-  const sharePreviewHref = `${getDailyRoute(challenge.date)}/share-preview`
+  function buildResultShareData(): DailyResultShareData {
+    return {
+      score: currentAttempt.score,
+      targetScore: challenge.targetScore,
+      durationMs: currentAttempt.bestTimeMs ?? dailyState.analytics.completionTimeMs ?? 0,
+      streak: currentAttempt.streakAtCompletion || dailyState.stats.currentStreak,
+    }
+  }
+
+  function getPublicResultUrl() {
+    const origin = window.location.origin
+    return `${origin}${buildDailyResultPath(challenge.date, buildResultShareData())}`
+  }
+
+  async function handleShareResultLink() {
+    const publicResultUrl = getPublicResultUrl()
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `${challenge.shareTitle} Result`,
+          text: `I scored ${currentAttempt.score}/${challenge.targetScore} on ${challenge.shareTitle}.`,
+          url: publicResultUrl,
+        })
+        setResultLinkCopied(false)
+        await trackShareClick("system_share")
+        return
+      }
+
+      await navigator.clipboard.writeText(publicResultUrl)
+      setResultLinkCopied(true)
+      await trackShareClick("copy")
+    } catch {
+      setResultLinkCopied(false)
+    }
+  }
+
+  const resultShareData = buildResultShareData()
+  const resultPath = buildDailyResultPath(challenge.date, resultShareData)
+  const resultDownloadPath = buildDailyResultDownloadPath(challenge.date, resultShareData)
   const completionRate = dailyState.stats.successRate
   const averageGuessCount = dailyState.stats.averageGuessCount
   const averageCompletionTime = dailyState.stats.averageCompletionTimeMs
@@ -371,7 +408,7 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
         />
 
         <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <Card className="overflow-hidden border-white/60 bg-white/88 backdrop-blur dark:border-white/10 dark:bg-black/25">
+          <Card className="overflow-hidden bg-white dark:bg-[#30261e]">
             <CardHeader className="gap-4">
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary">Daily Challenge</Badge>
@@ -381,7 +418,7 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
                 <Badge variant="outline">Best {dailyState.stats.maxStreak}</Badge>
               </div>
               <div className="space-y-3">
-                <CardTitle className="text-3xl sm:text-4xl">{challenge.headline}</CardTitle>
+                <CardTitle className="text-3xl font-black sm:text-4xl">{challenge.headline}</CardTitle>
                 <CardDescription className="max-w-2xl text-base leading-7">
                   {challenge.description}
                 </CardDescription>
@@ -455,7 +492,7 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
         <GuessList guesses={dailyState.acceptedGuesses} />
 
         {isCompleted ? (
-          <Card className="border-amber-200 bg-amber-50/90 dark:border-amber-900 dark:bg-amber-950/30">
+          <Card className="bg-[#ffe01b] text-[#241c15] dark:bg-[#ffe01b] dark:text-[#241c15]">
             <CardHeader>
               <div className="flex flex-wrap gap-2">
                 <Badge variant="success">Completed</Badge>
@@ -469,19 +506,26 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3 sm:flex-row">
-              <Button
-                className={
-                  shareBounce
-                    ? "rounded-xl animate-pulse shadow-[0_0_0_8px_rgba(251,191,36,0.15)]"
-                    : "rounded-xl"
-                }
-                onClick={handleCopyShare}
-                type="button"
+              <a
+                className={buttonVariants({
+                  className: shareBounce
+                    ? "animate-pulse rounded-full shadow-[0_0_0_8px_rgba(255,77,116,0.16)]"
+                    : "rounded-full",
+                })}
+                href={resultDownloadPath}
               >
-                {copied ? "Copied share card" : "Copy themed share card"}
+                Download image
+              </a>
+              <Button
+                className="rounded-full"
+                onClick={handleShareResultLink}
+                type="button"
+                variant="outline"
+              >
+                {resultLinkCopied ? "Copied result link" : "Share result link"}
               </Button>
               <Button
-                className="rounded-xl"
+                className="rounded-full"
                 onClick={() => setShowResultDialog(true)}
                 type="button"
                 variant="outline"
@@ -489,16 +533,16 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
                 Open result summary
               </Button>
               <Link
-                className={buttonVariants({ className: "rounded-xl", variant: "outline" })}
-                href={sharePreviewHref}
+                className={buttonVariants({ className: "rounded-full", variant: "outline" })}
+                href={resultPath}
               >
-                Open share preview
+                Open public result
               </Link>
             </CardContent>
           </Card>
         ) : null}
 
-        <Card className="border-white/50 bg-white/85 backdrop-blur dark:border-white/10 dark:bg-black/20">
+        <Card className="bg-[#fbefe3] dark:bg-[#30261e]">
           <CardHeader>
             <CardTitle>Server analytics snapshot</CardTitle>
             <CardDescription>
@@ -553,7 +597,7 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
                 <p className="mt-2 text-2xl font-semibold">{overview.activePlayers7d}</p>
               </div>
             </div>
-            <div className="rounded-2xl border border-border/70 bg-background/65 p-4">
+            <div className="rounded-lg border-2 border-border bg-background p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                 API-ready payload
               </p>
@@ -575,7 +619,7 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
             </div>
             <DialogTitle>Women Guess Game {challenge.date}</DialogTitle>
             <DialogDescription>
-              This is the copy-ready result card for today&apos;s themed daily challenge.
+              This is the share-ready result card for today&apos;s themed daily challenge.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 px-6 pb-2">
@@ -606,28 +650,43 @@ function DailyChallengeBoardClient({ challenge }: DailyChallengeBoardProps) {
               </div>
             </div>
             <Separator />
-            <div className="rounded-2xl border border-border/70 bg-background/80 p-4">
+            <div className="rounded-lg border-2 border-border bg-background p-4">
               <pre className="whitespace-pre-wrap text-sm leading-6 text-foreground">
                 {currentAttempt.shareText}
               </pre>
             </div>
           </div>
           <DialogFooter>
-            <Button
-              className={shareBounce ? "animate-pulse rounded-xl" : "rounded-xl"}
-              onClick={handleCopyShare}
-              type="button"
+            <a
+              className={buttonVariants({
+                className: shareBounce ? "animate-pulse rounded-full" : "rounded-full",
+              })}
+              href={resultDownloadPath}
             >
-              {copied ? "Copied share card" : "Copy share card"}
+              Download image
+            </a>
+            <Button
+              className="rounded-full"
+              onClick={handleShareResultLink}
+              type="button"
+              variant="outline"
+            >
+              {resultLinkCopied ? "Copied result link" : "Share result link"}
             </Button>
             <Link
-              className={buttonVariants({ className: "rounded-xl", variant: "outline" })}
+              className={buttonVariants({ className: "rounded-full", variant: "outline" })}
+              href={resultPath}
+            >
+              Public result
+            </Link>
+            <Link
+              className={buttonVariants({ className: "rounded-full", variant: "outline" })}
               href="/leaderboard"
             >
               View leaderboard
             </Link>
             <Button
-              className="rounded-xl"
+              className="rounded-full"
               onClick={() => setShowResultDialog(false)}
               type="button"
               variant="outline"

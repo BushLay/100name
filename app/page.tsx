@@ -22,12 +22,12 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <main className="min-h-svh bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.2),transparent_24%),radial-gradient(circle_at_20%_20%,rgba(250,204,21,0.14),transparent_18%),linear-gradient(180deg,#f0f9ff_0%,#e0f2fe_24%,#ecfeff_52%,#f8fafc_100%)] px-4 py-8 text-foreground dark:bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.18),transparent_24%),radial-gradient(circle_at_20%_20%,rgba(250,204,21,0.08),transparent_18%),linear-gradient(180deg,#08152a_0%,#082f49_32%,#0f172a_100%)] sm:px-6 lg:px-8">
+    <main className="min-h-svh bg-[#fffdf8] px-4 py-8 text-foreground dark:bg-[#241c15] sm:px-6 lg:px-8">
       <JsonLd data={buildHomeStructuredData()} id="home-structured-data" />
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
         <GameBoard />
 
-        <Card className="overflow-hidden border-sky-200/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.95),rgba(224,242,254,0.92)_40%,rgba(236,253,245,0.92)_100%)] backdrop-blur dark:border-sky-300/15 dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.88),rgba(12,74,110,0.88)_40%,rgba(4,47,46,0.86)_100%)]">
+        <Card className="overflow-hidden bg-[#ffe01b] dark:bg-[#4a3c31]">
           <CardHeader className="gap-4">
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary">Daily Challenge</Badge>
@@ -35,13 +35,12 @@ export default function Page() {
               <Badge variant="outline">Share Run</Badge>
             </div>
             <div className="space-y-3">
-              <CardTitle className="max-w-3xl text-2xl leading-tight sm:text-3xl">
-                Clear today, then come back for tomorrow&apos;s remix.
+              <CardTitle className="max-w-3xl text-3xl leading-tight font-black sm:text-4xl">
+                Today has a theme. Your memory has the names.
               </CardTitle>
               <CardDescription className="max-w-3xl text-base leading-7">
-                The base mode accepts any real woman who passes Wikidata. The daily mode
-                swaps in a themed ruleset each day, like actors or fictional characters,
-                so every run feels like a new board with its own bragging rights.
+                Open mode lets your memory roam. Daily mode gives everyone the same playful
+                constraint, then lets the best answers rise to the top.
               </CardDescription>
             </div>
           </CardHeader>
@@ -76,13 +75,13 @@ export default function Page() {
             <div className="flex flex-col gap-3 sm:flex-row">
               <DailyChallengeCta />
               <Link
-                className={buttonVariants({ className: "rounded-xl", variant: "outline" })}
+                className={buttonVariants({ className: "rounded-full", variant: "outline" })}
                 href="/how-to-play"
               >
                 How to play
               </Link>
               <Link
-                className={buttonVariants({ className: "rounded-xl", variant: "outline" })}
+                className={buttonVariants({ className: "rounded-full", variant: "outline" })}
                 href="/leaderboard"
               >
                 Local leaderboard
@@ -92,7 +91,7 @@ export default function Page() {
         </Card>
 
         <article className="grid gap-6">
-          <Card className="border-white/60 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-black/25">
+          <Card className="bg-[#fbefe3] dark:bg-[#30261e]">
             <CardHeader className="gap-3">
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary">What Is Name 100</Badge>
@@ -168,7 +167,7 @@ export default function Page() {
             </CardContent>
           </Card>
 
-          <Card className="border-white/50 bg-white/85 backdrop-blur dark:border-white/10 dark:bg-black/20">
+          <Card className="bg-white dark:bg-[#30261e]">
             <CardHeader>
               <CardTitle className="text-2xl">How the two main modes differ</CardTitle>
               <CardDescription className="max-w-3xl text-base leading-7">

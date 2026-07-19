@@ -12,7 +12,7 @@ type GuessListProps = {
 
 export function GuessList({ guesses }: GuessListProps) {
   return (
-    <Card className="border-emerald-200/70 bg-[linear-gradient(180deg,rgba(240,253,244,0.98),rgba(236,253,245,0.95))] shadow-[0_20px_60px_rgba(16,185,129,0.14)] backdrop-blur dark:border-emerald-400/20 dark:bg-[linear-gradient(180deg,rgba(4,39,31,0.92),rgba(10,20,18,0.96))]">
+    <Card className="bg-white dark:bg-[#30261e]">
       <CardHeader className="gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -32,11 +32,11 @@ export function GuessList({ guesses }: GuessListProps) {
             No verified names yet. Start with a famous full name and build your board.
           </p>
         ) : (
-          <div className="max-h-72 overflow-y-auto rounded-2xl border border-emerald-200/80 bg-white/65 p-3 dark:border-emerald-400/20 dark:bg-black/20">
+          <div className="max-h-72 overflow-y-auto rounded-lg border-2 border-[#241c15] bg-[#fbefe3] p-3 dark:border-[#fffaf1] dark:bg-[#4a3c31]">
             <div className="flex flex-wrap gap-2.5">
               {guesses.map((guess, index) => (
                 <div
-                  className="rounded-2xl border border-emerald-200/80 bg-white/80 px-3 py-2 text-sm shadow-sm dark:border-emerald-400/20 dark:bg-white/5"
+                  className="rounded-full border-2 border-[#241c15] bg-white px-3 py-2 text-sm dark:border-[#fffaf1] dark:bg-[#30261e]"
                   key={guess.qid}
                 >
                   <div className="flex items-center gap-2">

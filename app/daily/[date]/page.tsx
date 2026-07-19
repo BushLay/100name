@@ -272,13 +272,13 @@ export default async function DailyPage({ params }: DailyPageProps) {
   const today = getTodayDateString()
 
   return (
-    <main className="min-h-svh bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.18),transparent_30%),radial-gradient(circle_at_right,rgba(14,165,233,0.18),transparent_28%),linear-gradient(180deg,#fff8f1_0%,#f7f1ff_48%,#eef6ff_100%)] px-4 py-8 text-foreground dark:bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.12),transparent_30%),radial-gradient(circle_at_right,rgba(56,189,248,0.16),transparent_28%),linear-gradient(180deg,#141226_0%,#111827_48%,#0b1220_100%)] sm:px-6 lg:px-8">
+    <main className="min-h-svh bg-[#fffdf8] px-4 py-8 text-foreground dark:bg-[#241c15] sm:px-6 lg:px-8">
       <JsonLd
         data={buildDailyStructuredData(challenge)}
         id={`daily-structured-data-${challenge.date}`}
       />
       <div className="mx-auto mb-6 flex w-full max-w-5xl flex-col gap-6">
-        <Card className="border-white/60 bg-white/88 backdrop-blur dark:border-white/10 dark:bg-black/25">
+        <Card className="bg-[#ffe01b] text-[#241c15] dark:bg-[#ffe01b] dark:text-[#241c15]">
           <CardHeader className="gap-4">
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary">Daily Challenge</Badge>
@@ -288,7 +288,7 @@ export default async function DailyPage({ params }: DailyPageProps) {
                 {date === today ? "Today" : "Archive"}
               </Badge>
             </div>
-            <h1 className="text-3xl font-semibold sm:text-4xl">
+            <h1 className="doodle-underline text-4xl font-black sm:text-5xl">
               {challenge.title} for {date}
             </h1>
             <CardDescription className="max-w-3xl text-base leading-7">
@@ -304,7 +304,7 @@ export default async function DailyPage({ params }: DailyPageProps) {
           </CardContent>
         </Card>
 
-        <Card className="border-white/50 bg-white/85 backdrop-blur dark:border-white/10 dark:bg-black/20">
+        <Card className="bg-[#fbefe3] dark:bg-[#30261e]">
           <CardHeader>
             <CardTitle className="text-2xl">How this date-specific challenge works</CardTitle>
             <CardDescription className="max-w-3xl text-base leading-7">
@@ -336,7 +336,7 @@ export default async function DailyPage({ params }: DailyPageProps) {
       <DailyChallengeBoard challenge={challenge} />
 
       <div className="mx-auto mt-6 flex w-full max-w-5xl flex-col gap-6">
-        <Card className="border-white/50 bg-white/85 backdrop-blur dark:border-white/10 dark:bg-black/20">
+        <Card className="bg-white dark:bg-[#30261e]">
           <CardHeader>
             <CardTitle className="text-2xl">Daily strategy and sharing notes</CardTitle>
             <CardDescription className="max-w-3xl text-base leading-7">
@@ -372,7 +372,7 @@ export default async function DailyPage({ params }: DailyPageProps) {
           </CardContent>
         </Card>
 
-        <Card className="border-white/50 bg-white/85 backdrop-blur dark:border-white/10 dark:bg-black/20">
+        <Card className="bg-[#fbefe3] dark:bg-[#30261e]">
           <CardHeader>
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary">FAQ</Badge>

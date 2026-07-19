@@ -319,7 +319,7 @@ export function LeaderboardBoard() {
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
-      <Card className="border-white/60 bg-white/88 backdrop-blur dark:border-white/10 dark:bg-black/25">
+      <Card className="bg-[#ffe01b] text-[#241c15] dark:bg-[#ffe01b] dark:text-[#241c15]">
         <CardHeader>
           <div className="flex flex-wrap gap-2">
             <Badge variant="secondary">Server Leaderboard</Badge>
@@ -378,7 +378,7 @@ export function LeaderboardBoard() {
         </CardContent>
       </Card>
 
-      <Card className="border-white/50 bg-white/85 backdrop-blur dark:border-white/10 dark:bg-black/20">
+      <Card className="bg-[#fbefe3] dark:bg-[#30261e]">
         <CardHeader>
           <CardTitle>Identity and recovery</CardTitle>
           <CardDescription>
@@ -440,7 +440,7 @@ export function LeaderboardBoard() {
           </form>
 
           {latestRecoveryCode ? (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-sm dark:border-amber-900 dark:bg-amber-950/20 lg:col-span-2">
+            <div className="rounded-lg border-2 border-[#241c15] bg-[#ffe01b] p-4 text-sm text-[#241c15] lg:col-span-2">
               <p className="font-medium">Your recovery code</p>
               <p className="mt-2 font-mono text-lg tracking-[0.18em]">{latestRecoveryCode}</p>
               <p className="mt-2 text-muted-foreground">
@@ -450,7 +450,7 @@ export function LeaderboardBoard() {
             </div>
           ) : null}
 
-          <div className="rounded-2xl border border-sky-200 bg-sky-50/80 p-4 text-sm dark:border-sky-900 dark:bg-sky-950/20 lg:col-span-2">
+          <div className="rounded-lg border-2 border-[#241c15] bg-white p-4 text-sm text-[#241c15] lg:col-span-2">
             <p className="font-medium">Account system for this release</p>
             <p className="mt-2 text-muted-foreground">
               This version uses public player names plus recovery codes. Email sign-in is
@@ -460,13 +460,13 @@ export function LeaderboardBoard() {
           </div>
 
           {identityError ? (
-            <div className="rounded-2xl border border-red-200 bg-red-50/80 p-4 text-sm font-medium dark:border-red-900 dark:bg-red-950/20 lg:col-span-2">
+            <div className="rounded-lg border-2 border-[#b3263e] bg-[#fff1f3] p-4 text-sm font-medium text-[#7d1830] lg:col-span-2">
               {identityError}
             </div>
           ) : null}
 
           {identitySuccess ? (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4 text-sm font-medium dark:border-emerald-900 dark:bg-emerald-950/20 lg:col-span-2">
+            <div className="rounded-lg border-2 border-[#2d7b65] bg-[#edf8f3] p-4 text-sm font-medium text-[#174c3e] lg:col-span-2">
               {identitySuccess}
             </div>
           ) : null}
@@ -480,7 +480,7 @@ export function LeaderboardBoard() {
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="border-white/50 bg-white/85 backdrop-blur dark:border-white/10 dark:bg-black/20">
+        <Card className="bg-white dark:bg-[#30261e]">
           <CardHeader>
             <CardTitle>Top fastest players</CardTitle>
             <CardDescription>Server-ranked best completion times.</CardDescription>
@@ -496,7 +496,7 @@ export function LeaderboardBoard() {
           </CardContent>
         </Card>
 
-        <Card className="border-white/50 bg-white/85 backdrop-blur dark:border-white/10 dark:bg-black/20">
+        <Card className="bg-[#fbefe3] dark:bg-[#30261e]">
           <CardHeader>
             <CardTitle>Top streak players</CardTitle>
             <CardDescription>Streak length is now server-computed.</CardDescription>
@@ -512,7 +512,7 @@ export function LeaderboardBoard() {
           </CardContent>
         </Card>
 
-        <Card className="border-white/50 bg-white/85 backdrop-blur dark:border-white/10 dark:bg-black/20">
+        <Card className="bg-white dark:bg-[#30261e]">
           <CardHeader>
             <CardTitle>Today ranking</CardTitle>
             <CardDescription>Current daily leaderboard snapshot for {today}.</CardDescription>
@@ -526,7 +526,7 @@ export function LeaderboardBoard() {
                   No completed runs yet for today. Be the first to post a time.
                 </p>
                 <Link
-                  className={buttonVariants({ className: "rounded-xl", variant: "outline" })}
+                  className={buttonVariants({ className: "rounded-full", variant: "outline" })}
                   href={getDailyRoute(today)}
                 >
                   Open today&apos;s challenge
@@ -565,7 +565,7 @@ export function LeaderboardBoard() {
         </Card>
       </div>
 
-      <Card className="border-white/50 bg-white/85 backdrop-blur dark:border-white/10 dark:bg-black/20">
+      <Card className="bg-[#fbefe3] dark:bg-[#30261e]">
         <CardHeader>
           <CardTitle>Played dates history</CardTitle>
           <CardDescription>

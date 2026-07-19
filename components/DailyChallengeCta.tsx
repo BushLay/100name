@@ -17,7 +17,7 @@ export function DailyChallengeCta() {
 
   return (
     <Link
-      className={buttonVariants({ className: "rounded-xl", size: "default" })}
+      className={buttonVariants({ className: "rounded-full", size: "default" })}
       href={getDailyRoute(today)}
     >
       Play today&apos;s challenge

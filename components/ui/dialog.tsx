@@ -64,7 +64,7 @@ function DialogContent({ className, children }: DialogContentProps) {
   return (
     <div
       className={cn(
-        "mx-auto w-full max-w-2xl rounded-3xl border border-white/20 bg-background p-0 shadow-2xl",
+        "mx-auto w-full max-w-2xl rounded-lg border-2 border-border bg-background p-0 shadow-[6px_6px_0_rgba(36,28,21,0.9)]",
         className
       )}
       data-slot="dialog-content"
@@ -86,7 +86,7 @@ function DialogHeader({ className, children }: SimpleChildrenProps) {
 
 function DialogTitle({ className, children }: SimpleChildrenProps) {
   return (
-    <h2 className={cn("text-2xl font-semibold tracking-tight", className)} data-slot="dialog-title">
+    <h2 className={cn("text-2xl font-black", className)} data-slot="dialog-title">
       {children}
     </h2>
   )

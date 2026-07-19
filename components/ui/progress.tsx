@@ -13,13 +13,13 @@ function Progress({ className, value }: ProgressProps) {
       aria-valuemax={100}
       aria-valuemin={0}
       aria-valuenow={safeValue}
-      className={cn("h-3 w-full overflow-hidden rounded-full bg-secondary", className)}
+      className={cn("h-3 w-full overflow-hidden rounded-full border-2 border-border bg-background", className)}
       data-slot="progress"
       role="progressbar"
     >
       <div
         aria-hidden="true"
-        className="h-full rounded-full bg-primary transition-[width] duration-500"
+        className="h-full rounded-full bg-accent transition-[width] duration-500"
         style={{ width: `${safeValue}%` }}
       />
     </div>

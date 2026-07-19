@@ -20,7 +20,7 @@ export function AdminPageShell({
   children,
 }: AdminPageShellProps) {
   return (
-    <main className="min-h-svh bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.16),transparent_28%),radial-gradient(circle_at_right,rgba(14,165,233,0.14),transparent_26%),linear-gradient(180deg,#fffaf0_0%,#f4f8ff_48%,#eef2ff_100%)] px-4 py-8 text-foreground dark:bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.12),transparent_28%),radial-gradient(circle_at_right,rgba(56,189,248,0.14),transparent_26%),linear-gradient(180deg,#141226_0%,#111827_48%,#0b1220_100%)] sm:px-6 lg:px-8">
+    <main className="min-h-svh bg-[#fffdf8] px-4 py-8 text-foreground dark:bg-[#241c15] sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
         <section className="rounded-[2rem] border border-white/60 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-white/10 dark:bg-black/20">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">

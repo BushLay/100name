@@ -25,7 +25,7 @@ export function RecentGuessHistory({ items }: RecentGuessHistoryProps) {
   }
 
   return (
-    <Card className="border-amber-200/70 bg-[linear-gradient(180deg,rgba(255,251,235,0.98),rgba(255,247,237,0.95))] shadow-[0_20px_60px_rgba(245,158,11,0.12)] backdrop-blur dark:border-amber-400/20 dark:bg-[linear-gradient(180deg,rgba(49,24,5,0.92),rgba(24,24,27,0.96))]">
+    <Card className="bg-[#fbefe3] dark:bg-[#30261e]">
       <CardHeader className="gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -59,7 +59,7 @@ export function RecentGuessHistory({ items }: RecentGuessHistoryProps) {
 
               return (
               <div
-                className={`flex flex-col gap-2 rounded-2xl border px-4 py-3 shadow-sm transition ${rowClassName}`}
+                className={`flex flex-col gap-2 rounded-lg border-2 px-4 py-3 transition ${rowClassName}`}
                 key={item.id}
               >
                 <div className="flex flex-wrap items-center gap-2">

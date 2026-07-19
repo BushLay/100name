@@ -33,10 +33,10 @@ function isActivePath(pathname: string, href: string, todayHref: string) {
 
 function navLinkClassName(active: boolean) {
   return cn(
-    "rounded-full border px-3 py-2 text-sm font-medium transition",
+    "rounded-full border-2 px-4 py-2 text-sm font-bold transition-[transform,background-color] duration-150",
     active
-      ? "border-sky-400 bg-sky-500 text-white shadow-[0_10px_30px_rgba(14,165,233,0.28)] dark:border-sky-300 dark:bg-sky-400 dark:text-slate-950"
-      : "border-white/60 bg-white/75 text-foreground hover:border-sky-300 hover:bg-sky-50 dark:border-white/10 dark:bg-white/5 dark:hover:border-sky-400/40 dark:hover:bg-sky-400/10"
+      ? "border-[#241c15] bg-[#ffe01b] text-[#241c15] shadow-[0_3px_0_rgba(36,28,21,0.22)]"
+      : "border-transparent bg-transparent text-foreground hover:-translate-y-0.5 hover:border-[#241c15] hover:bg-[#fbefe3] dark:hover:border-[#fffaf1]"
   )
 }
 
@@ -56,17 +56,17 @@ export function SiteNavShell({
 
   return (
     <div className="min-h-svh bg-background">
-      <header className="sticky top-0 z-50 border-b border-white/60 bg-white/80 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/70">
-        <div className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
+      <header className="sticky top-0 z-50 border-b-2 border-[#241c15] bg-[#fffdf8]/95 backdrop-blur-xl dark:border-[#fffaf1] dark:bg-[#241c15]/95">
+        <div className="mx-auto w-full max-w-6xl px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4">
             <Link className="flex min-w-0 items-center gap-3" href="/">
-              <Image alt="Name 100 logo" className="h-10 w-10 rounded-xl" height={40} src="/logo.png" width={40} />
+              <Image alt="Name 100 logo" className="h-11 w-11 rounded-lg" height={44} src="/logo.png" width={44} />
               <div className="min-w-0">
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-sky-700 dark:text-sky-300">
+                <p className="text-base font-black text-foreground">
                   Name 100
                 </p>
-                <p className="truncate text-sm text-muted-foreground">
-                  Jump between home, daily play, rules, and leaderboard.
+                <p className="truncate text-xs font-medium text-muted-foreground">
+                  One name at a time.
                 </p>
               </div>
             </Link>
@@ -85,7 +85,7 @@ export function SiteNavShell({
                 ))}
               </nav>
               <Link
-                className="rounded-full border border-sky-300 bg-sky-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-600 dark:border-sky-400/40 dark:bg-sky-500/90"
+                className="rounded-full border-2 border-[#241c15] bg-[#241c15] px-5 py-2.5 text-sm font-bold text-white shadow-[0_3px_0_rgba(36,28,21,0.24)] transition hover:-translate-y-0.5 dark:border-[#ffe01b] dark:bg-[#ffe01b] dark:text-[#241c15]"
                 href={todayHref}
                 onClick={() => setMenuOpen(false)}
               >
@@ -96,7 +96,7 @@ export function SiteNavShell({
             <button
               aria-expanded={menuOpen}
               aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/60 bg-white/80 text-foreground transition hover:border-sky-300 hover:bg-sky-50 md:hidden dark:border-white/10 dark:bg-white/5 dark:hover:border-sky-400/40 dark:hover:bg-sky-400/10"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#241c15] bg-[#ffe01b] text-[#241c15] transition hover:-translate-y-0.5 md:hidden dark:border-[#fffaf1]"
               onClick={() => setMenuOpen((current) => !current)}
               type="button"
             >
@@ -105,7 +105,7 @@ export function SiteNavShell({
           </div>
 
           {menuOpen ? (
-            <div className="mt-4 rounded-3xl border border-white/60 bg-white/88 p-4 shadow-[0_18px_50px_rgba(15,23,42,0.12)] md:hidden dark:border-white/10 dark:bg-slate-950/90">
+            <div className="mt-4 rounded-lg border-2 border-[#241c15] bg-[#fbefe3] p-4 shadow-[4px_4px_0_#241c15] md:hidden dark:border-[#fffaf1] dark:bg-[#30261e] dark:shadow-[4px_4px_0_#fffaf1]">
               <nav className="flex flex-col gap-2">
                 {allItems.map((item) => (
                   <Link
@@ -119,7 +119,7 @@ export function SiteNavShell({
                 ))}
               </nav>
               <Link
-                className="mt-3 inline-flex rounded-full border border-sky-300 bg-sky-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-600 dark:border-sky-400/40 dark:bg-sky-500/90"
+                className="mt-3 inline-flex rounded-full border-2 border-[#241c15] bg-[#241c15] px-5 py-2.5 text-sm font-bold text-white transition dark:border-[#ffe01b] dark:bg-[#ffe01b] dark:text-[#241c15]"
                 href={todayHref}
                 onClick={() => setMenuOpen(false)}
               >
@@ -132,10 +132,10 @@ export function SiteNavShell({
 
       {children}
 
-      <footer className="border-t border-white/60 bg-white/80 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/70">
+      <footer className="border-t-2 border-[#241c15] bg-[#ffe01b] dark:border-[#fffaf1] dark:bg-[#30261e]">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6 sm:px-6 lg:px-8">
-          <p className="text-sm text-muted-foreground">
-            Keep moving through the site from here too, even if you landed on a subpage first.
+          <p className="text-sm font-semibold text-[#241c15] dark:text-[#fffaf1]">
+            Finished here? There is always another name waiting.
           </p>
           <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
             <div className="flex flex-wrap gap-2">
@@ -152,7 +152,7 @@ export function SiteNavShell({
             </div>
             <a
               aria-label="Featured on Findly.tools"
-              className="inline-flex w-fit rounded-xl transition hover:opacity-85"
+              className="inline-flex w-fit rounded-lg transition hover:opacity-85"
               href="https://findly.tools/100names?utm_source=100names"
               rel="noopener noreferrer"
               target="_blank"

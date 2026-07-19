@@ -18,16 +18,16 @@ export default function OpenGraphImage() {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "56px",
-          background:
-            "linear-gradient(135deg, rgba(255,248,241,1) 0%, rgba(247,241,255,1) 48%, rgba(238,246,255,1) 100%)",
-          color: "#111827",
+          background: "#FFE01B",
+          color: "#241C15",
+          border: "18px solid #241C15",
         }}
       >
         <div
           style={{
             display: "flex",
             fontSize: 28,
-            fontWeight: 600,
+              fontWeight: 900,
           }}
         >
           Name 100
@@ -45,7 +45,7 @@ export default function OpenGraphImage() {
               display: "flex",
               fontSize: 74,
               lineHeight: 1.05,
-              fontWeight: 700,
+              fontWeight: 900,
             }}
           >
             Daily women name challenge.
@@ -55,7 +55,7 @@ export default function OpenGraphImage() {
               display: "flex",
               fontSize: 30,
               lineHeight: 1.4,
-              color: "#4b5563",
+              color: "#4A3C31",
             }}
           >
             Find 100 real women, validate with Wikidata, and share your finish time.
@@ -66,7 +66,7 @@ export default function OpenGraphImage() {
             display: "flex",
             gap: "14px",
             fontSize: 24,
-            color: "#374151",
+            color: "#241C15",
           }}
         >
           <div>SEO-ready daily routes</div>
