@@ -25,20 +25,22 @@ export function buildHomeStructuredData() {
       "@context": "https://schema.org",
       "@type": "WebSite",
       name: "Name 100",
+      alternateName: "Name 100 Women",
       url: CANONICAL_SITE_URL,
       description:
-        "Name 100 is a daily women name challenge and open practice game powered by Wikidata and Wikipedia validation.",
+        "Name 100 Women is a daily women name challenge and open practice game powered by Wikidata and Wikipedia validation.",
       inLanguage: "en",
     },
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      name: "Name 100",
+      name: "Name 100 Women",
+      alternateName: "Name 100",
       applicationCategory: "GameApplication",
       operatingSystem: "Any",
       url: CANONICAL_SITE_URL,
       description:
-        "A browser game where players submit women names, clear themed daily challenges, and share leaderboard-ready results.",
+        "A browser game where players name 100 women, clear themed daily challenges, and share verified results.",
       isAccessibleForFree: true,
       genre: ["Trivia", "Word Game", "Knowledge Game"],
       publisher: {

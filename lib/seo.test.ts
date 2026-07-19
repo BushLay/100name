@@ -82,7 +82,7 @@ test("structured data helpers serialize as valid JSON", () => {
   }
 })
 
-test("core pages include h1 tags and canonical metadata definitions", async () => {
+test("core pages include semantic headings and canonical metadata definitions", async () => {
   const pagesWithOwnH1 = [
     "app/how-to-play/page.tsx",
     "app/leaderboard/page.tsx",
@@ -96,10 +96,13 @@ test("core pages include h1 tags and canonical metadata definitions", async () =
   }
 
   const homePageSource = await readProjectFile("app/page.tsx")
-  const homeHeroSource = await readProjectFile("components/GameBoard.tsx")
+  const homeGameSource = await readProjectFile("components/GameBoard.tsx")
 
   assert.match(homePageSource, /canonical:/)
-  assert.match(homeHeroSource, /<h1[\s>]/)
+  assert.equal(homePageSource.match(/<h1[\s>]/g)?.length, 1)
+  assert.match(homePageSource, /<h2[\s>]/)
+  assert.match(homePageSource, /Name 100 Women/)
+  assert.doesNotMatch(homeGameSource, /<h1[\s>]/)
 })
 
 test("daily page source contains future-date index control", async () => {

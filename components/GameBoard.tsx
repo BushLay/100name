@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import { useEffect, useState, useSyncExternalStore } from "react"
 
 import type { OpenGameState, SubmitOpenGuessResponse } from "@/lib/backend-contracts"
@@ -214,21 +213,12 @@ function GameBoardClient() {
                 </Badge>
               </div>
               <div className="space-y-3">
-                <div className="flex items-center">
-                  <Image
-                    alt="100name logo"
-                    className="h-auto w-40"
-                    height={160}
-                    priority
-                    src="/logo.png"
-                    width={160}
-                  />
-                </div>
-                <h1 className="doodle-underline max-w-2xl text-4xl font-black sm:text-5xl">
-                  How many remarkable women can you name?
-                </h1>
+                <h2 className="max-w-2xl text-3xl font-black sm:text-4xl">
+                  What counts as a verified answer?
+                </h2>
                 <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-                  Type a full name. We&apos;ll check Wikidata. You bring the memory; we&apos;ll keep the score.
+                  Each full name must resolve to the right public entity, match the women
+                  rule, and have a qualifying Wikipedia presence.
                 </p>
               </div>
               <div className="grid gap-3 sm:grid-cols-3">
